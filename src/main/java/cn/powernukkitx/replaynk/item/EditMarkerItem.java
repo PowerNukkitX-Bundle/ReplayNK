@@ -20,7 +20,7 @@ public class EditMarkerItem extends ReplayNKItem {
         if (Trail.isOperatingTrail(player) && entity instanceof MarkerEntity markerEntity) {
             var trail = Trail.getOperatingTrail(player);
             var index = markerEntity.getMarkerIndex();
-            trail.getMarkers().get(index).showEditorForm(player);
+            trail.getMarkers().get(index).showEditorForm(player, trail);
         }
     }
 }

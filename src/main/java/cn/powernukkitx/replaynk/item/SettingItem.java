@@ -20,6 +20,6 @@ public class SettingItem extends ReplayNKItem {
             return;
         }
         var trail = Trail.getOperatingTrail(player);
-        //TODO
+        trail.showEditorForm(player);
     }
 }
