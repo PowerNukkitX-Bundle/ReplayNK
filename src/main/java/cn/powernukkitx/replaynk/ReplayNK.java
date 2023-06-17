@@ -29,6 +29,8 @@ import java.util.Map;
 public final class ReplayNK extends PluginBase implements Listener {
 
     public static final int TRAIL_TICK_PERIOD = 5;
+    private static final Map<Player, Integer> PLAYER_ACTION_TIMER = new HashMap<>();
+    private static final int PLAYER_ACTION_COOL_DOWN = 5;
     @Getter
     private static ReplayNK instance = null;
 
@@ -81,9 +83,6 @@ public final class ReplayNK extends PluginBase implements Listener {
     private void registerEntities() {
         Entity.registerCustomEntity(new CustomClassEntityProvider(MarkerEntity.class));
     }
-
-    private static final Map<Player, Integer> PLAYER_ACTION_TIMER = new HashMap<>();
-    private static final int PLAYER_ACTION_COOL_DOWN = 5;
 
     @EventHandler
     @SuppressWarnings("unused")

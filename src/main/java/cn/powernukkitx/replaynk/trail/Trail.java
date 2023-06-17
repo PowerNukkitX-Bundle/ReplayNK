@@ -49,16 +49,14 @@ public final class Trail {
     private static final double DEFAULT_BEZIER_CURVE_STEP = 0.001;
     private static final double DEFAULT_MIN_DISTANCE = 0.5;
     private static final double DEFAULT_CAMERA_SPEED = 2;
-
+    private final List<Marker> markers = new ArrayList<>();
+    private final String name;
     private transient Player operator;
     @Setter
     private transient boolean playing;
     private transient List<Marker> runtimeMarkers;
     @Setter
     private transient boolean changed;
-
-    private final List<Marker> markers = new ArrayList<>();
-    private final String name;
     @Setter
     private boolean useBezierCurves = false;
     @Setter
@@ -405,13 +403,13 @@ public final class Trail {
             this.easeTime = marker.easeTime;
         }
 
+        public static MarkerBuilder builder() {
+            return new MarkerBuilder();
+        }
+
         public void computeLinearEaseTime(Marker lastMarker, double cameraSpeed) {
             var distance = Math.sqrt(Math.pow(lastMarker.x - x, 2) + Math.pow(lastMarker.y - y, 2) + Math.pow(lastMarker.z - z, 2));
             this.easeTime = distance / cameraSpeed;
-        }
-
-        public static MarkerBuilder builder() {
-            return new MarkerBuilder();
         }
 
         public void spawnDisplayEntity(Level level, Trail trail) {

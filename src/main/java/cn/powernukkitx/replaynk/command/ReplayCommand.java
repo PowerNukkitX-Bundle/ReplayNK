@@ -1,15 +1,11 @@
 package cn.powernukkitx.replaynk.command;
 
-import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.command.tree.ParamList;
 import cn.nukkit.command.utils.CommandLogger;
-import cn.nukkit.level.ParticleEffect;
-import cn.nukkit.math.Vector3;
-import cn.nukkit.scheduler.Task;
 import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.trail.Trail;
 
@@ -95,29 +91,6 @@ public class ReplayCommand extends PluginCommand<ReplayNK> {
                 sender.sendMessage(strBuilder.toString());
                 return 1;
             }
-//            case "showbc" -> {
-//                var trail = Trail.getOperatingTrail(player);
-//                if (trail == null) {
-//                    player.sendMessage("§cYou are not operating any trail!");
-//                    return 0;
-//                }
-//                if (!trail.isUseBezierCurves()) {
-//                    player.sendMessage("§cThis trail does not use bezier curves!");
-//                    return 0;
-//                }
-//                trail.prepareRuntimeMarkers();
-//                var startTime = Server.getInstance().getTick();
-//                Server.getInstance().getScheduler().scheduleRepeatingTask(new Task() {
-//                    @Override
-//                    public void onRun(int currentTick) {
-//                        trail.getRuntimeMarkers().forEach(marker -> player.getLevel().addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS));
-//                        if (currentTick - startTime >= 200) {
-//                            this.cancel();
-//                        }
-//                    }
-//                }, 5);
-//                return 1;
-//            }
             default -> {
                 return 0;
             }

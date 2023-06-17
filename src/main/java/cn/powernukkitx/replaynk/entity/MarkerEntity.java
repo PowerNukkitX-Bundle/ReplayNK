@@ -17,6 +17,7 @@ public class MarkerEntity extends ReplayNKEntity {
                     .summonable(true)
                     .spawnEgg(false)
                     .build();
+    private static final String MARKER_INDEX_KEY = "MarkerIndex";
 
     public MarkerEntity(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
@@ -31,8 +32,6 @@ public class MarkerEntity extends ReplayNKEntity {
     public String getOriginalName() {
         return "Marker";
     }
-
-    private static final String MARKER_INDEX_KEY = "MarkerIndex";
 
     public int getMarkerIndex() {
         return namedTag.getInt(MARKER_INDEX_KEY);
