@@ -10,6 +10,8 @@ import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
 import cn.nukkit.item.Item;
+import cn.nukkit.lang.PluginI18n;
+import cn.nukkit.lang.PluginI18nManager;
 import cn.nukkit.plugin.PluginBase;
 import cn.powernukkitx.replaynk.command.ReplayCommand;
 import cn.powernukkitx.replaynk.entity.MarkerEntity;
@@ -28,11 +30,13 @@ import java.util.Map;
  */
 public final class ReplayNK extends PluginBase implements Listener {
 
-    public static final int TRAIL_TICK_PERIOD = 5;
+    public static final int TRAIL_TICK_PERIOD = 2;
     private static final Map<Player, Integer> PLAYER_ACTION_TIMER = new HashMap<>();
-    private static final int PLAYER_ACTION_COOL_DOWN = 5;
+    private static final int PLAYER_ACTION_COOL_DOWN = 2;
     @Getter
-    private static ReplayNK instance = null;
+    private static ReplayNK instance;
+    @Getter
+    private static PluginI18n I18n;
 
     {
         instance = this;
@@ -40,6 +44,7 @@ public final class ReplayNK extends PluginBase implements Listener {
 
     @Override
     public void onLoad() {
+        I18n = PluginI18nManager.register(this);
         var logger = getLogger();
         logger.info("Loading ReplayNK...");
         logger.info("Registering items...");

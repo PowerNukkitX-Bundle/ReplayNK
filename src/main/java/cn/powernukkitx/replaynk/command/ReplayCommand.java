@@ -1,5 +1,6 @@
 package cn.powernukkitx.replaynk.command;
 
+import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.command.data.CommandParamType;
@@ -45,7 +46,7 @@ public class ReplayCommand extends PluginCommand<ReplayNK> {
     @Override
     public int execute(CommandSender sender, String commandLabel, Map.Entry<String, ParamList> result, CommandLogger log) {
         if (!sender.isPlayer()) {
-            sender.sendMessage("§cThis command can only be executed by player!");
+            log.addMessage("replaynk.command.replay.onlyplayer").output();
             return 0;
         }
         var player = sender.asPlayer();
@@ -54,22 +55,22 @@ public class ReplayCommand extends PluginCommand<ReplayNK> {
                 String trailName = result.getValue().get(1).get();
                 var trail = Trail.getTrail(trailName);
                 if (trail == null) {
-                    sender.sendMessage("§cTrail not found!");
+                    log.addMessage("replaynk.trail.notfound", trailName).output();
                     return 0;
                 }
                 trail.startOperating(player);
-                player.sendMessage("§aTrail operating started!");
+                log.addMessage("replaynk.trail.startoperating", trailName).output();
                 return 1;
             }
             case "create" -> {
                 String trailName = result.getValue().get(1).get();
                 var trail = Trail.create(trailName);
                 if (trail != null) {
-                    player.sendMessage("§aTrail " + trailName + " created!");
+                    log.addMessage("replaynk.trail.created", trailName);
                     trail.startOperating(player);
-                    player.sendMessage("§aTrail operating started!");
+                    log.addMessage("replaynk.trail.startoperating", trailName).output();
                 } else {
-                    player.sendMessage("§cTrail " + trailName + " already exists!");
+                    log.addMessage("replaynk.trail.alreadyexist", trailName).output();
                 }
                 return 1;
             }
@@ -77,18 +78,18 @@ public class ReplayCommand extends PluginCommand<ReplayNK> {
                 String trailName = result.getValue().get(1).get();
                 var trail = Trail.removeTrail(trailName);
                 if (trail != null)
-                    player.sendMessage("§aTrail " + trailName + " removed!");
+                    log.addMessage("replaynk.trail.removed", trailName).output();
                 else
-                    player.sendMessage("§cTrail " + trailName + " not exists!");
+                    log.addMessage("replaynk.trail.notfound", trailName).output();
                 return 1;
             }
             case "list" -> {
-                var strBuilder = new StringBuilder("§aTrails: ");
+                var strBuilder = new StringBuilder();
                 var trails = Trail.getTrails();
                 for (var trail : trails.values()) {
                     strBuilder.append(trail.getName()).append(" ");
                 }
-                sender.sendMessage(strBuilder.toString());
+                log.addMessage("replaynk.command.replay.list", strBuilder.toString()).output();
                 return 1;
             }
             default -> {

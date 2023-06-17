@@ -8,6 +8,7 @@ import cn.nukkit.camera.instruction.impl.SetInstruction;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.form.element.ElementDropdown;
 import cn.nukkit.form.element.ElementInput;
+import cn.nukkit.form.element.ElementLabel;
 import cn.nukkit.form.element.ElementToggle;
 import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.item.Item;
@@ -224,7 +225,7 @@ public final class Trail {
         OPERATING_TRAILS.remove(operator);
         operator.getInventory().clearAll();
         markers.forEach(Marker::deleteDisplayEntity);
-        operator.sendMessage("§aTrail " + name + " stopped operating.");
+        operator.sendMessage(ReplayNK.getI18n().tr(operator.getLanguageCode(), "replaynk.trail.stopoperating", name));
         operator = null;
     }
 
@@ -276,14 +277,14 @@ public final class Trail {
 
     public void play(Player player) {
         if (playing) {
-            player.sendMessage("§cTrail " + name + " is already playing.");
+            player.sendMessage(ReplayNK.getI18n().tr(operator.getLanguageCode(), "replaynk.trail.alreadyplaying", name));
             return;
         }
         if (markers.size() <= 1) {
-            player.sendMessage("§cTrail " + name + " has too little markers.");
+            player.sendMessage(ReplayNK.getI18n().tr(operator.getLanguageCode(), "replaynk.trail.toolittlemarks", name));
             return;
         }
-        player.sendMessage("§aTrail " + name + " started playing.");
+        player.sendMessage(ReplayNK.getI18n().tr(operator.getLanguageCode(), "replaynk.trail.startplaying", name));
         playing = true;
         markers.forEach(Marker::invisible);
         prepareRuntimeMarkers();
@@ -291,21 +292,27 @@ public final class Trail {
     }
 
     public void showEditorForm(Player player) {
-        var useBezierCurvesElement = new ElementToggle("Use Bezier Curves", useBezierCurves);
-        var showBazierCurvesElement = new ElementToggle("Show Bezier Curves", showBezierCurves);
-        var minDistanceElement = new ElementInput("Minimum Distance Between Two Points", String.valueOf(DEFAULT_MIN_DISTANCE), String.valueOf(minDistance));
-        var cameraSpeedElement = new ElementInput("Default Camera Speed", String.valueOf(DEFAULT_CAMERA_SPEED), String.valueOf(defaultCameraSpeed));
-        var doRecalculateEaseTimeElement = new ElementToggle("Recalculate Ease Time?", true);
-        var form = new FormWindowCustom(name, List.of(useBezierCurvesElement, showBazierCurvesElement, minDistanceElement, cameraSpeedElement, doRecalculateEaseTimeElement));
+        var langCode = player.getLanguageCode();
+        var useBezierCurvesElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.usebeziercurves"), useBezierCurves);
+        var useBezierCurvesDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.usebeziercurves.details"));
+        var showBazierCurvesElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showbeziercurves"), showBezierCurves);
+        var showBazierCurvesDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showbeziercurves.details"));
+        var minDistanceElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.mindistance"), String.valueOf(DEFAULT_MIN_DISTANCE), String.valueOf(minDistance));
+        var minDistanceDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.mindistance.details"));
+        var defaultCameraSpeedElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.defaultcameraspeed"), String.valueOf(DEFAULT_CAMERA_SPEED), String.valueOf(defaultCameraSpeed));
+        var defaultCameraSpeedDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.defaultcameraspeed.details"));
+        var doRecalculateEaseTimeElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.dorecalculateeasetime"), true);
+        var doRecalculateEaseTimeDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.dorecalculateeasetime.details"));
+        var form = new FormWindowCustom(name, List.of(useBezierCurvesElement, useBezierCurvesDetailsElement, showBazierCurvesElement, showBazierCurvesDetailsElement, minDistanceElement, minDistanceDetailsElement, defaultCameraSpeedElement, defaultCameraSpeedDetailsElement, doRecalculateEaseTimeElement, doRecalculateEaseTimeDetailsElement));
         form.addHandler((p, id) -> {
             var response = form.getResponse();
             if (response == null) return;
             try {
                 useBezierCurves = response.getToggleResponse(0);
-                showBezierCurves = response.getToggleResponse(1);
-                minDistance = Double.parseDouble(response.getInputResponse(2));
-                defaultCameraSpeed = Double.parseDouble(response.getInputResponse(3));
-                if (response.getToggleResponse(4)) {
+                showBezierCurves = response.getToggleResponse(2);
+                minDistance = Double.parseDouble(response.getInputResponse(4));
+                defaultCameraSpeed = Double.parseDouble(response.getInputResponse(6));
+                if (response.getToggleResponse(8)) {
                     computeAllLinearEaseTime(markers, defaultCameraSpeed, false);
                 }
             } catch (Exception e) {
