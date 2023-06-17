@@ -1,7 +1,6 @@
 package cn.powernukkitx.replaynk.trail;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.api.DoNotModify;
 import cn.nukkit.camera.data.*;
 import cn.nukkit.camera.instruction.impl.ClearInstruction;
@@ -32,7 +31,6 @@ import lombok.extern.log4j.Log4j2;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author daoge_cmd
@@ -397,14 +395,22 @@ public final class Trail {
     }
 
     public static final class Marker {
-        @Getter private double x;
-        @Getter private double y;
-        @Getter private double z;
-        @Getter private double rotX;
-        @Getter private double rotY;
-        @Getter private EaseType easeType;
-        @Getter private double cameraSpeed;
-        @Getter private double distance;
+        @Getter
+        private double x;
+        @Getter
+        private double y;
+        @Getter
+        private double z;
+        @Getter
+        private double rotX;
+        @Getter
+        private double rotY;
+        @Getter
+        private EaseType easeType;
+        @Getter
+        private double cameraSpeed;
+        @Getter
+        private double distance;
 
         private transient double easeTime = -1;
         private transient MarkerEntity markerEntity;
