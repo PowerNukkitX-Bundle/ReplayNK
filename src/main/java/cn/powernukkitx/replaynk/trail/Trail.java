@@ -1,6 +1,7 @@
 package cn.powernukkitx.replaynk.trail;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.api.DoNotModify;
 import cn.nukkit.camera.data.*;
 import cn.nukkit.camera.instruction.impl.ClearInstruction;
@@ -289,7 +290,7 @@ public final class Trail {
         playing = true;
         markers.forEach(Marker::invisible);
         prepareRuntimeMarkers();
-        runtimeMarkers.get(0).play(player, this);
+        new Thread(() -> runtimeMarkers.get(0).play(player, this)).start();
     }
 
     public void showEditorForm(Player player) {
@@ -353,6 +354,7 @@ public final class Trail {
         } else {
             runtimeMarkers.addAll(markers);
         }
+        cacheIndexForRuntimeMarkers();
     }
 
     public void resetAllMarkerSpeed() {
@@ -380,6 +382,13 @@ public final class Trail {
         }
     }
 
+    private void cacheIndexForRuntimeMarkers() {
+        //为runtime marker缓存index，提高运镜时流畅度
+        for (int i = 0; i < runtimeMarkers.size(); i++) {
+            runtimeMarkers.get(i).runtimeMarkIndex = i;
+        }
+    }
+
     public boolean pause() {
         if (!playing)
             return false;
@@ -387,19 +396,20 @@ public final class Trail {
         return true;
     }
 
-    @Getter
     public static final class Marker {
-        private double x;
-        private double y;
-        private double z;
-        private double rotX;
-        private double rotY;
-        private EaseType easeType;
-        private double cameraSpeed;
-        private double distance;
+        @Getter private double x;
+        @Getter private double y;
+        @Getter private double z;
+        @Getter private double rotX;
+        @Getter private double rotY;
+        @Getter private EaseType easeType;
+        @Getter private double cameraSpeed;
+        @Getter private double distance;
 
         private transient double easeTime = -1;
         private transient MarkerEntity markerEntity;
+        //用于给RuntimeMark缓存index，防止运镜卡顿
+        private transient int runtimeMarkIndex;
 
         public Marker(double x, double y, double z, double rotX, double rotY, EaseType easeType, double cameraSpeed, double distance) {
             this.x = x;
@@ -595,7 +605,7 @@ public final class Trail {
             player.showFormWindow(form);
         }
 
-        public void play(Player player, Trail trail) {
+        private void play(Player player, Trail trail) {
             var runtimeMarkers = trail.getRuntimeMarkers();
             var markers = trail.getMarkers();
             var preset = CameraPreset.FREE;
@@ -607,26 +617,23 @@ public final class Trail {
                     .ease(new Ease((float) easeTime, easeType))
                     .build());
             player.dataPacket(pk);
-            CompletableFuture.runAsync(() -> {
-                if (runtimeMarkers.indexOf(this) != 0) {
-                    try {
-                        //提前50ms以避免卡顿
-                        Thread.sleep((long) (easeTime * 1000) - 10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+            if (runtimeMarkers.indexOf(this) != 0) {
+                try {
+                    //提前25ms以避免卡顿
+                    Thread.sleep((long) (easeTime * 1000) - 25);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                var index = runtimeMarkers.indexOf(this);
-                if (!trail.isPlaying() || index == runtimeMarkers.size() - 1) {
-                    trail.setPlaying(false);
-                    resetCamera(player);
-                    markers.forEach(Marker::visible);
-                    trail.clearRuntimeMarkers();
-                    return;
-                }
-                var next = runtimeMarkers.get(index + 1);
-                next.play(player, trail);
-            });
+            }
+            if (!trail.isPlaying() || runtimeMarkIndex == runtimeMarkers.size() - 1) {
+                trail.setPlaying(false);
+                resetCamera(player);
+                markers.forEach(Marker::visible);
+                trail.clearRuntimeMarkers();
+                return;
+            }
+            var next = runtimeMarkers.get(runtimeMarkIndex + 1);
+            next.play(player, trail);
         }
 
         public void invisible() {
