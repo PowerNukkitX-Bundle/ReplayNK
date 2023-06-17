@@ -25,6 +25,7 @@ import cn.powernukkitx.replaynk.entity.MarkerEntity;
 import cn.powernukkitx.replaynk.item.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -58,7 +59,7 @@ public final class Trail {
     private transient Player operator;
     @Setter
     private transient boolean playing;
-    private final transient List<Marker> runtimeMarkers = new ArrayList<>();
+    private transient List<Marker> runtimeMarkers;
 
     private Trail(String name) {
         this.name = name;
@@ -160,6 +161,10 @@ public final class Trail {
     }
 
     public void clearRuntimeMarkers() {
+        if (runtimeMarkers == null) {
+            runtimeMarkers = new ArrayList<>();
+            return;
+        }
         if (runtimeMarkers.isEmpty())
             return;
         runtimeMarkers.clear();
