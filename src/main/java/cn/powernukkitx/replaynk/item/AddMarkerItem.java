@@ -2,6 +2,7 @@ package cn.powernukkitx.replaynk.item;
 
 import cn.nukkit.Player;
 import cn.powernukkitx.replaynk.ReplayNK;
+import cn.powernukkitx.replaynk.trail.Marker;
 import cn.powernukkitx.replaynk.trail.Trail;
 
 /**
@@ -21,7 +22,7 @@ public class AddMarkerItem extends ReplayNKItem {
         }
         var trail = Trail.getOperatingTrail(player);
         var location = player.getLocation();
-        var builder = Trail.Marker.builder()
+        var builder = Marker.builder()
                 .x((float) location.x)
                 .y((float) location.y)
                 .z((float) location.z)
