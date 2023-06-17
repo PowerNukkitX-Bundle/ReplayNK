@@ -17,7 +17,6 @@ public class PlayItem extends ReplayNKItem {
     public void onInteract(Player player) {
         if (Trail.isOperatingTrail(player)) {
             var trail = Trail.getOperatingTrail(player);
-            player.sendMessage("§aStart playing trail " + trail.getName());
             trail.play(player);
         }
     }

@@ -1,6 +1,7 @@
 package cn.powernukkitx.replaynk.item;
 
 import cn.nukkit.Player;
+import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.trail.Trail;
 
 /**
@@ -16,7 +17,7 @@ public class ExitItem extends ReplayNKItem {
     @Override
     public void onInteract(Player player) {
         if (!Trail.isOperatingTrail(player)) {
-            player.sendMessage("§cYou are not operating a trail.");
+            player.sendMessage(ReplayNK.getI18n().tr(player.getLanguageCode(), "replaynk.trail.notoperatingtrail"));
             return;
         }
         var trail = Trail.getOperatingTrail(player);

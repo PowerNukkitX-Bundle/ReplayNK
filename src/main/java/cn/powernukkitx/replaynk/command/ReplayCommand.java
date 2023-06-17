@@ -1,6 +1,5 @@
 package cn.powernukkitx.replaynk.command;
 
-import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.command.data.CommandParamType;
@@ -19,7 +18,7 @@ import java.util.Map;
  */
 public class ReplayCommand extends PluginCommand<ReplayNK> {
     public ReplayCommand(ReplayNK plugin) {
-        super("replay", "replaynk.commands.replay.description", plugin);
+        super("replay", "replaynk.command.replay.description", plugin);
         setPermission("replaynk.command.replay");
         commandParameters.clear();
         commandParameters.put("operate", new CommandParameter[]{
@@ -37,9 +36,6 @@ public class ReplayCommand extends PluginCommand<ReplayNK> {
         commandParameters.put("list", new CommandParameter[]{
                 CommandParameter.newEnum("list", new String[]{"list"}),
         });
-        commandParameters.put("showbc", new CommandParameter[]{
-                CommandParameter.newEnum("showbc", new String[]{"showbc"}),
-        });
         enableParamTree();
     }
 
@@ -52,6 +48,10 @@ public class ReplayCommand extends PluginCommand<ReplayNK> {
         var player = sender.asPlayer();
         switch (result.getKey()) {
             case "operate" -> {
+                if (Trail.isOperatingTrail(player)) {
+                    log.addMessage("replaynk.trail.alreadyoperatingtrail").output();
+                    return 0;
+                }
                 String trailName = result.getValue().get(1).get();
                 var trail = Trail.getTrail(trailName);
                 if (trail == null) {

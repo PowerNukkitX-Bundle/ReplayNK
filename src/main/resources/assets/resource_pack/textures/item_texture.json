@@ -15,7 +15,7 @@
 			"textures": "textures/items/exit_item_texture"
 		},
 		"replaynk_clear_marker": {
-			"textures": "textures/items/clear_item_texture"
+			"textures": "textures/items/clear_marker_item_texture"
 		},
 		"replaynk_edit_marker": {
 			"textures": "textures/items/edit_marker_item_texture"

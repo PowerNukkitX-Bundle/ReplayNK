@@ -2,6 +2,7 @@ package cn.powernukkitx.replaynk.item;
 
 import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
+import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.entity.MarkerEntity;
 import cn.powernukkitx.replaynk.trail.Trail;
 
@@ -17,7 +18,11 @@ public class EditMarkerItem extends ReplayNKItem {
 
     @Override
     public void onClickEntity(Player player, Entity entity) {
-        if (Trail.isOperatingTrail(player) && entity instanceof MarkerEntity markerEntity) {
+        if (!Trail.isOperatingTrail(player)) {
+            player.sendMessage(ReplayNK.getI18n().tr(player.getLanguageCode(), "replaynk.trail.notoperatingtrail"));
+            return;
+        }
+        if (entity instanceof MarkerEntity markerEntity) {
             var trail = Trail.getOperatingTrail(player);
             var index = markerEntity.getMarkerIndex();
             trail.getMarkers().get(index).showEditorForm(player, trail);

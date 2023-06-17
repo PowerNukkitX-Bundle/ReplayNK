@@ -183,8 +183,9 @@ public final class Trail {
     }
 
     public List<Marker> getOrCalculateRuntimeMarkers() {
-        if (runtimeMarkers == null || isChanged()) {
+        if (runtimeMarkers == null || runtimeMarkers.isEmpty() || isChanged()) {
             prepareRuntimeMarkers();
+            setChanged(false);
         }
         return runtimeMarkers;
     }
@@ -301,7 +302,7 @@ public final class Trail {
         var minDistanceDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.mindistance.details"));
         var defaultCameraSpeedElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.defaultcameraspeed"), String.valueOf(DEFAULT_CAMERA_SPEED), String.valueOf(defaultCameraSpeed));
         var defaultCameraSpeedDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.defaultcameraspeed.details"));
-        var doRecalculateEaseTimeElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.dorecalculateeasetime"), true);
+        var doRecalculateEaseTimeElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.dorecalculateeasetime"), false);
         var doRecalculateEaseTimeDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.dorecalculateeasetime.details"));
         var form = new FormWindowCustom(name, List.of(useBezierCurvesElement, useBezierCurvesDetailsElement, showBazierCurvesElement, showBazierCurvesDetailsElement, minDistanceElement, minDistanceDetailsElement, defaultCameraSpeedElement, defaultCameraSpeedDetailsElement, doRecalculateEaseTimeElement, doRecalculateEaseTimeDetailsElement));
         form.addHandler((p, id) -> {
@@ -311,12 +312,14 @@ public final class Trail {
                 useBezierCurves = response.getToggleResponse(0);
                 showBezierCurves = response.getToggleResponse(2);
                 minDistance = Double.parseDouble(response.getInputResponse(4));
+                setChanged(true);
                 defaultCameraSpeed = Double.parseDouble(response.getInputResponse(6));
                 if (response.getToggleResponse(8)) {
-                    computeAllLinearEaseTime(markers, defaultCameraSpeed, false);
+                    resetAllMarkerSpeed();
+                    computeAllLinearEaseTime(markers, false);
                 }
             } catch (Exception e) {
-                player.sendMessage("§cInvalid input.");
+                player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.generic.invalidinput"));
             }
         });
         player.showFormWindow(form);
@@ -340,19 +343,25 @@ public final class Trail {
                         p[i].z = (1 - u) * p[i].z + u * p[i + 1].z;
                         p[i].rotX = (1 - u) * p[i].rotX + u * p[i + 1].rotX;
                         p[i].rotY = (1 - u) * p[i].rotY + u * p[i + 1].rotY;
-                        //speed
+                        p[i].cameraSpeed = (1 - u) * p[i].cameraSpeed + u * p[i + 1].cameraSpeed;
                     }
                 }
                 runtimeMarkers.add(p[0]);
             }
 
-            computeAllLinearEaseTime(runtimeMarkers, defaultCameraSpeed, true);
+            computeAllLinearEaseTime(runtimeMarkers, true);
         } else {
             runtimeMarkers.addAll(markers);
         }
     }
 
-    private void computeAllLinearEaseTime(List<Marker> markers, double cameraSpeed, boolean doRemoveTooCloseMarker) {
+    public void resetAllMarkerSpeed() {
+        for (var marker : markers) {
+            marker.cameraSpeed = defaultCameraSpeed;
+        }
+    }
+
+    private void computeAllLinearEaseTime(List<Marker> markers, boolean doRemoveTooCloseMarker) {
         boolean first = true;
         for (Iterator<Marker> iterator = markers.iterator(); iterator.hasNext(); ) {
             var marker = iterator.next();
@@ -366,7 +375,7 @@ public final class Trail {
             if (distance < minDistance && doRemoveTooCloseMarker) {
                 iterator.remove();
             } else {
-                marker.easeTime = distance / cameraSpeed;
+                marker.setDistance(distance);
             }
         }
     }
@@ -386,18 +395,33 @@ public final class Trail {
         private double rotX;
         private double rotY;
         private EaseType easeType;
-        private double easeTime;
+        private double cameraSpeed;
+        private double distance;
 
+        private transient double easeTime = -1;
         private transient MarkerEntity markerEntity;
 
-        public Marker(double x, double y, double z, double rotX, double rotY, EaseType easeType, double easeTime) {
+        public Marker(double x, double y, double z, double rotX, double rotY, EaseType easeType, double cameraSpeed, double distance) {
             this.x = x;
             this.y = y;
             this.z = z;
             this.rotX = rotX;
             this.rotY = rotY;
             this.easeType = easeType;
-            this.easeTime = easeTime;
+            this.cameraSpeed = cameraSpeed;
+            this.distance = distance;
+            computeEaseTime();
+        }
+
+        public Marker(double x, double y, double z, double rotX, double rotY, EaseType easeType, double cameraSpeed, Marker lastMarker) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.rotX = rotX;
+            this.rotY = rotY;
+            this.easeType = easeType;
+            this.cameraSpeed = cameraSpeed;
+            computeDistance(lastMarker);
         }
 
         public Marker(Marker marker) {
@@ -407,16 +431,52 @@ public final class Trail {
             this.rotX = marker.rotX;
             this.rotY = marker.rotY;
             this.easeType = marker.easeType;
-            this.easeTime = marker.easeTime;
+            this.cameraSpeed = marker.cameraSpeed;
+            this.distance = marker.distance;
+            computeEaseTime();
         }
 
         public static MarkerBuilder builder() {
             return new MarkerBuilder();
         }
 
-        public void computeLinearEaseTime(Marker lastMarker, double cameraSpeed) {
-            var distance = Math.sqrt(Math.pow(lastMarker.x - x, 2) + Math.pow(lastMarker.y - y, 2) + Math.pow(lastMarker.z - z, 2));
-            this.easeTime = distance / cameraSpeed;
+        public void setCameraSpeedAndCalDistance(Marker lastMarker, double cameraSpeed) {
+            setCameraSpeed(cameraSpeed);
+            computeDistance(lastMarker);
+            computeEaseTime();
+        }
+
+        public void computeDistance(Trail trail) {
+            var index = trail.getMarkers().indexOf(this);
+            if (index == 0) {
+                distance = 1;
+                cameraSpeed = 1;
+            } else {
+                computeDistance(trail.getMarkers().get(index - 1));
+            }
+        }
+
+        public void computeDistance(Marker lastMarker) {
+            distance = Math.sqrt(Math.pow(lastMarker.x - x, 2) + Math.pow(lastMarker.y - y, 2) + Math.pow(lastMarker.z - z, 2));
+            computeEaseTime();
+        }
+
+        public void setDistance(double distance) {
+            this.distance = distance;
+            computeEaseTime();
+        }
+
+        public void setCameraSpeed(double cameraSpeed) {
+            this.cameraSpeed = cameraSpeed;
+            computeEaseTime();
+        }
+
+        public void computeEaseTime() {
+            this.easeTime = distance / this.cameraSpeed;
+        }
+
+        public double getEaseTime() {
+            return easeTime;
         }
 
         public void spawnDisplayEntity(Level level, Trail trail) {
@@ -458,21 +518,25 @@ public final class Trail {
         }
 
         public void showEditorForm(Player player, Trail trail) {
+            var langCode = player.getLanguageCode();
             var markers = trail.getMarkers();
-            var posElement = new ElementInput("Pos", "Enter the new pos", x + "," + y + "," + z);
-            var rotElement = new ElementInput("Rot", "Enter the new rot", rotX + "," + rotY);
-            var easeTypeElement = new ElementDropdown("EaseType", Arrays.stream(EaseType.values()).map(EaseType::getType).toList(), 0);
-            var easeTimeElement = new ElementInput("EaseTime", "Enter the new ease time", String.valueOf(this.easeTime));
-            var autoEaseTimeElement = new ElementToggle("Automatically recalculate the ease time if pos changed?", true);
-            var indexElement = new ElementInput("Index", "Enter the new index", String.valueOf(markers.indexOf(this)));
-            var form = new FormWindowCustom("Marker - " + markers.indexOf(this), List.of(posElement, rotElement, easeTypeElement, easeTimeElement, autoEaseTimeElement, indexElement));
+            var posElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.mark.editorform.pos"), "", x + ", " + y + ", " + z);
+            var rotElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.mark.editorform.rot"), "", rotX + ", " + rotY);
+            var easeTypeElement = new ElementDropdown(ReplayNK.getI18n().tr(langCode, "replaynk.mark.editorform.easetype"), Arrays.stream(EaseType.values()).map(EaseType::getType).toList(), 0);
+            var easeTypeDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.mark.editorform.easetype.details"));
+            var indexElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.mark.editorform.index"), "", String.valueOf(markers.indexOf(this)));
+            var indexDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.mark.editorform.index.details"));
+            var easeTimeElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.mark.editorform.easetime"), "", this.cameraSpeed + "m/s");
+            var easeTimeDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.mark.editorform.easetime.details"));
+            var autoEaseTimeElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.mark.editorform.autoeasetime"), true);
+            var form = new FormWindowCustom("Marker - " + markers.indexOf(this), List.of(posElement, rotElement, easeTypeElement, easeTypeDetailsElement, indexElement, indexDetailsElement, easeTimeElement, easeTimeDetailsElement, autoEaseTimeElement));
             form.addHandler((p, id) -> {
                 var response = form.getResponse();
                 if (response == null) return;
                 try {
                     var pos = response.getInputResponse(0).split(",");
                     if (pos.length != 3) {
-                        player.sendMessage("§cInvalid pos format.");
+                        player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.mark.invalidpos"));
                         return;
                     }
                     x = Double.parseDouble(pos[0]);
@@ -481,37 +545,51 @@ public final class Trail {
 
                     var rot = response.getInputResponse(1).split(",");
                     if (rot.length != 2) {
-                        player.sendMessage("§cInvalid rot format.");
+                        player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.mark.invalidrot"));
                         return;
                     }
                     rotX = Double.parseDouble(rot[0]);
                     rotY = Double.parseDouble(rot[1]);
 
                     easeType = EaseType.valueOf(response.getDropdownResponse(2).getElementContent().toUpperCase());
-                    easeTime = Double.parseDouble(response.getInputResponse(3));
 
-                    var autoEaseTime = response.getToggleResponse(4);
-                    if (autoEaseTime) {
-                        var index = markers.indexOf(this);
-                        if (index > 0) {
-                            var lastMarker = markers.get(index - 1);
-                            computeLinearEaseTime(lastMarker, trail.getDefaultCameraSpeed());
-                        }
-                    }
-
-                    var newIndex = Integer.parseInt(response.getInputResponse(5));
+                    var newIndex = Integer.parseInt(response.getInputResponse(4));
                     if (newIndex < 0 || newIndex >= markers.size()) {
-                        player.sendMessage("§cInvalid index.");
+                        player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.mark.invalidindex"));
                         return;
                     }
                     int oldIndex = markers.indexOf(this);
                     if (newIndex != oldIndex) {
                         trail.moveMarker(oldIndex, newIndex);
+                        computeDistance(trail);
+                    }
+                    respawnDisplayEntity(player.getLevel(), trail);
+
+                    var easeTimeOrSpeed = response.getInputResponse(6);
+                    if (easeTimeOrSpeed.endsWith("m/s")) {
+                        cameraSpeed = Double.parseDouble(easeTimeOrSpeed.substring(0, easeTimeOrSpeed.length() - 3));
+                    } else if (easeTimeOrSpeed.endsWith("s")) {
+                        var time = Double.parseDouble(easeTimeOrSpeed.substring(0, easeTimeOrSpeed.length() - 1));
+                        cameraSpeed = distance / time;
+                    } else {
+                        player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.mark.invalideasetime"));
+                        return;
                     }
 
-                    respawnDisplayEntity(player.getLevel(), trail);
+                    var autoEaseTime = response.getToggleResponse(8);
+                    if (autoEaseTime) {
+                        var index = markers.indexOf(this);
+                        if (index > 0) {
+                            var lastMarker = markers.get(index - 1);
+                            computeDistance(lastMarker);
+                        } else {
+                            easeTime = 0;
+                        }
+                    }
+
+                    trail.setChanged(true);
                 } catch (Exception e) {
-                    player.sendMessage("§cInvalid input.");
+                    player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.generic.invalidinput"));
                 }
             });
             player.showFormWindow(form);
@@ -532,20 +610,21 @@ public final class Trail {
             CompletableFuture.runAsync(() -> {
                 if (runtimeMarkers.indexOf(this) != 0) {
                     try {
-                        //提前10ms以避免卡顿
+                        //提前50ms以避免卡顿
                         Thread.sleep((long) (easeTime * 1000) - 10);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
-                if (!trail.isPlaying() || runtimeMarkers.indexOf(this) == runtimeMarkers.size() - 1) {
+                var index = runtimeMarkers.indexOf(this);
+                if (!trail.isPlaying() || index == runtimeMarkers.size() - 1) {
                     trail.setPlaying(false);
                     resetCamera(player);
                     markers.forEach(Marker::visible);
                     trail.clearRuntimeMarkers();
                     return;
                 }
-                var next = runtimeMarkers.get(runtimeMarkers.indexOf(this) + 1);
+                var next = runtimeMarkers.get(index + 1);
                 next.play(player, trail);
             });
         }
@@ -576,7 +655,7 @@ public final class Trail {
         private double rotX = 0;
         private double rotY = 0;
         private EaseType easeType = EaseType.LINEAR;
-        private double easeTime = 1;
+        private double cameraSpeed = DEFAULT_CAMERA_SPEED;
 
         MarkerBuilder() {
         }
@@ -611,26 +690,27 @@ public final class Trail {
             return this;
         }
 
-        public MarkerBuilder easeTime(double easeTime) {
-            this.easeTime = easeTime;
+        public MarkerBuilder cameraSpeed(double cameraSpeed) {
+            this.cameraSpeed = cameraSpeed;
             return this;
         }
 
         public Marker build(Trail trail) {
             var markers = trail.getMarkers();
-            var marker = new Marker(this.x, this.y, this.z, this.rotX, this.rotY, this.easeType, this.easeTime);
+            Marker marker;
             if (markers.size() > 0) {
                 var lastMarker = markers.get(markers.size() - 1);
-                marker.computeLinearEaseTime(lastMarker, trail.getDefaultCameraSpeed());
+                marker = new Marker(this.x, this.y, this.z, this.rotX, this.rotY, this.easeType, this.cameraSpeed, lastMarker);
             } else {
-                marker.easeTime = 1;
+                //花费一秒移动镜头到起始点
+                marker = new Marker(this.x, this.y, this.z, this.rotX, this.rotY, this.easeType, 1, 1);
             }
             return marker;
         }
 
-        public Marker build(Marker lastMarker, double cameraSpeed) {
-            var marker = new Marker(this.x, this.y, this.z, this.rotX, this.rotY, this.easeType, this.easeTime);
-            marker.computeLinearEaseTime(lastMarker, cameraSpeed);
+        public Marker build(Marker lastMarker) {
+            var marker = new Marker(this.x, this.y, this.z, this.rotX, this.rotY, this.easeType, this.cameraSpeed, lastMarker);
+            marker.setCameraSpeedAndCalDistance(lastMarker, this.cameraSpeed);
             return marker;
         }
     }

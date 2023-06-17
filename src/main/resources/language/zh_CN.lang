@@ -1,26 +1,48 @@
-replaynk.command.replay.description="ReplayNK插件主命令"
-replaynk.command.replay.onlyplayer="§c这个插件只能被玩家使用!"
-replaynk.command.replay.list="§a轨迹: §f"
+replaynk.command.replay.description=ReplayNK插件主命令
+replaynk.command.replay.onlyplayer=§c这个插件只能被玩家使用!
+replaynk.command.replay.list=§a轨迹: §f{%0}
 
-replaynk.trail.notfound="§c找不到轨迹预设 §f{%0} §c!"
-replaynk.trail.startoperating="§a开始操作轨迹预设 §f{%0} §a!"
-replaynk.trail.stopoperating="§a停止操作轨迹预设 §f{%0} §a!"
-replaynk.trail.created="§a成功创建轨迹预设 §f{%0} §a!"
-replaynk.trail.alreadyexist="§c轨迹预设 §f{%0} §c已经存在!"
-replaynk.trail.removed="§a成功移除轨迹预设 §f{%0} §a!"
-replaynk.trail.alreadyplaying="§c轨迹预设 §f{%0} §c已经在播放中!"
-replaynk.trail.toolittlemarks="§c轨迹预设 §f{%0} §c的标记点太少!"
-replaynk.trail.startplaying="§c开始播放轨迹预设 §f{%0}"
+replaynk.trail.notfound=§c找不到轨迹预设 §f{%0} §c!
+replaynk.trail.startoperating=§a开始操作轨迹预设 §f{%0} §a!
+replaynk.trail.stopoperating=§a停止操作轨迹预设 §f{%0} §a!
+replaynk.trail.created=§a成功创建轨迹预设 §f{%0} §a!
+replaynk.trail.alreadyexist=§c轨迹预设 §f{%0} §c已经存在!
+replaynk.trail.removed=§a成功移除轨迹预设 §f{%0} §a!
+replaynk.trail.alreadyplaying=§c轨迹预设 §f{%0} §c已经在播放中!
+replaynk.trail.toolittlemarks=§c轨迹预设 §f{%0} §c的标记点太少!
+replaynk.trail.startplaying=§a开始播放轨迹预设 §f{%0}
+replaynk.trail.alreadyoperatingtrail=§c你正在操作一个轨迹!请退出后重试!
+replaynk.trail.notoperatingtrail=§c你没有在操作任何轨迹!
+replaynk.trail.notplayingtrail=§c你没有在播放任何轨迹!
+replaynk.trail.paused=§a播放已停止！
 
-replaynk.trail.editorform.usebeziercurves="§c使用贝塞尔曲线"
-replaynk.trail.editorform.usebeziercurves.details="§f若开启，将会以你设置的标记点为贝塞尔曲线的控制点计算一条最佳拟合曲线"
-replaynk.trail.editorform.showbeziercurves="§c显示贝塞尔曲线拟合结果"
-replaynk.trail.editorform.showbeziercurves.details="§f若开启，将会使用粒子显示实时显示贝塞尔曲线拟合结果"
-replaynk.trail.editorform.mindistance="§c两点间最小距离"
-replaynk.trail.editorform.mindistance.details="§f此参数指定了两个标记点间的最小距离，离上一个标记点距离小于此值的标记点将会被删除。\n§f若开启了贝塞尔曲线平滑功能，计算出的标记点间距离将等于此值"
-replaynk.trail.editorform.defaultcameraspeed="§c默认运镜速度"
-replaynk.trail.editorform.defaultcameraspeed.details="§f此参数指定了创建标记点时的默认运镜速度。\n§f请注意，可以为每个标记点指定独立的运镜时间。\n运镜时间=两点距离/运镜速度，单位:秒"
-replaynk.trail.editorform.dorecalculateeasetime="§c是否重新计算所有标记点的运镜时间"
-replaynk.trail.editorform.dorecalculateeasetime.details="§f若启用，将会重置此轨迹预设中的所有标记点的运镜速度为默认运镜速度并使用默认运镜速度计算运镜时间"
+replaynk.trail.editorform.usebeziercurves=§a使用贝塞尔曲线
+replaynk.trail.editorform.usebeziercurves.details=§f若开启，将会以你设置的标记点为贝塞尔曲线的控制点计算一条最佳拟合曲线
+replaynk.trail.editorform.showbeziercurves=§a显示贝塞尔曲线拟合结果
+replaynk.trail.editorform.showbeziercurves.details=§f若开启，将会使用粒子显示实时显示贝塞尔曲线拟合结果
+replaynk.trail.editorform.mindistance=§a两点间最小距离
+replaynk.trail.editorform.mindistance.details=§f此参数指定了两个标记点间的最小距离，离上一个标记点距离小于此值的标记点将会被删除。§f若开启了贝塞尔曲线平滑功能，计算出的标记点间距离将等于此值
+replaynk.trail.editorform.defaultcameraspeed=§a默认运镜速度
+replaynk.trail.editorform.defaultcameraspeed.details=§f此参数指定了创建标记点时的默认运镜速度。§f请注意，可以为每个标记点指定独立的运镜时间。运镜时间=两点距离/运镜速度，单位:秒
+replaynk.trail.editorform.dorecalculateeasetime=§a是否重新计算所有标记点的运镜时间
+replaynk.trail.editorform.dorecalculateeasetime.details=§f若启用，将会重置此轨迹预设中的所有标记点的运镜速度为默认运镜速度并使用默认运镜速度计算运镜时间
 
-replaynk.generic.invalidinput="非法的输入!请检查你提供的值并重试!"
+replaynk.mark.added=§a成功添加标记点!
+replaynk.mark.removed=§a成功移除标记点!
+
+replaynk.mark.editorform.pos=§a坐标(x,y,z)
+replaynk.mark.editorform.rot=§a旋转(rotX,rotZ)
+replaynk.mark.editorform.easetype=§a平滑类型
+replaynk.mark.editorform.easetype.details=§f此选项决定镜头应该如何运动到下一个标记点。通常情况下请使用线性(LINEAR)
+replaynk.mark.editorform.easetime=§a运镜时间/速度
+replaynk.mark.editorform.easetime.details=§f这里可以填运镜的时间或者速度。若填写时间请在数字后加上单位's'，若是速度请在数字后加上单位'm/s'。例如: 1.5s(时间), 3m/s(速度)
+replaynk.mark.editorform.autoeasetime=§a是否在坐标更改后重新计算线性运镜时间
+replaynk.mark.editorform.index=§a标记点序号
+replaynk.mark.editorform.index.details=§f此序号指定了该标记点在整个轨迹链中的位置。镜头会从序号小的标记点平滑运动到序号大的标记点
+
+replaynk.mark.invalidpos=§c非法的坐标格式!
+replaynk.mark.invalidrot=§c非法的旋转格式!
+replaynk.mark.invalidindex=§c非法的序号!
+replaynk.mark.invalideasetime=§c非法的运镜时间/速度!
+
+replaynk.generic.invalidinput=§c非法的输入!请检查你提供的值并重试!

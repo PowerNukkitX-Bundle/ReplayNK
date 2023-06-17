@@ -1,26 +1,48 @@
-replaynk.command.replay.description="ReplayNK plugin main command"
-replaynk.command.replay.onlyplayer="§cThis command can only be executed by player!"
-replaynk.command.replay.list="§aTrails: §f"
+replaynk.command.replay.description=ReplayNK plugin main command
+replaynk.command.replay.onlyplayer=§cThis command can only be executed by player!
+replaynk.command.replay.list=§aTrails: §f{%0}
 
-replaynk.trail.notfound="§cCannot found trail §f{%0} §c!"
-replaynk.trail.startoperating="§aStart operating trail §f{%0} §a!"
-replaynk.trail.stopoperating="§aStop operating trail §f{%0} §a!"
-replaynk.trail.created="§aTrail §f{%0} §acreated!"
-replaynk.trail.alreadyexist="§cTrail §f{%0} §calready exist!"
-replaynk.trail.removed="§aTrail §f{%0} §aremoved!"
-replaynk.trail.alreadyplaying="§cTrail §f{%0} §calready playing!"
-replaynk.trail.toolittlemarks="§cTrail §f{%0} §chas too little markers!"
-replaynk.trail.startplaying="§aStart playing trail §f{%0} §a"
+replaynk.trail.notfound=§cCannot found trail §f{%0} §c!
+replaynk.trail.startoperating=§aStart operating trail §f{%0} §a!
+replaynk.trail.stopoperating=§aStop operating trail §f{%0} §a!
+replaynk.trail.created=§aTrail §f{%0} §acreated!
+replaynk.trail.alreadyexist=§cTrail §f{%0} §calready exist!
+replaynk.trail.removed=§aTrail §f{%0} §aremoved!
+replaynk.trail.alreadyplaying=§cTrail §f{%0} §calready playing!
+replaynk.trail.toolittlemarks=§cTrail §f{%0} §chas too little markers!
+replaynk.trail.startplaying=§aStart playing trail §f{%0} §a
+replaynk.trail.alreadyoperatingtrail=§cYou are already operating trail §f{%0} §c! Please stop operating it first!
+replaynk.trail.notoperatingtrail=§cYou are not operating any trail!
+replaynk.trail.notplayingtrail=§cYou are not playing any trail!
+replaynk.trail.paused=§aPlaying stopped!
 
-replaynk.trail.editorform.usebeziercurves="§cUse bezier curves"
-replaynk.trail.editorform.usebeziercurves.details="§fIf enabled, trail will be smoothed using bezier curves"
-replaynk.trail.editorform.showbeziercurves="§cShow bezier curves"
-replaynk.trail.editorform.showbeziercurves.details="§fIf enabled, bezier curves will be shown by particle"
-replaynk.trail.editorform.mindistance="§cMin distance between two marks"
-replaynk.trail.editorform.mindistance.details="§fThis parameter specifies the minimum distance between two markers, and markers whose distance from the previous marker is less than this value will be deleted. \n§fIf the Bezier curve smoothing function is turned on, the calculated distance between marker points will be equal to this value"
-replaynk.trail.editorform.defaultcameraspeed="§cDefault camera speed"
-replaynk.trail.editorform.defaultcameraspeed.details="§fThis parameter specifies the default camera speed when creating markers.\n§fNote that independent camera speeds can be specified for each marker.\nMirror movement time = distance between two points/mirror movement speed, unit: second"
-replaynk.trail.editorform.dorecalculateeasetime="§cDo recalculate all marks' ease time"
-replaynk.trail.editorform.dorecalculateeasetime.details="§fIf enabled, will reset the camera speed of all markers in this track preset to the default camera speed and use the default camera speed to calculate the camera time"
+replaynk.trail.editorform.usebeziercurves=§aUse bezier curves
+replaynk.trail.editorform.usebeziercurves.details=§fIf enabled, trail will be smoothed using bezier curves
+replaynk.trail.editorform.showbeziercurves=§aShow bezier curves
+replaynk.trail.editorform.showbeziercurves.details=§fIf enabled, bezier curves will be shown by particle
+replaynk.trail.editorform.mindistance=§aMin distance between two marks
+replaynk.trail.editorform.mindistance.details=§fThis parameter specifies the minimum distance between two markers, and markers whose distance from the previous marker is less than this value will be deleted. §fIf the Bezier curve smoothing function is turned on, the calculated distance between marker points will be equal to this value
+replaynk.trail.editorform.defaultcameraspeed=§aDefault camera speed
+replaynk.trail.editorform.defaultcameraspeed.details=§fThis parameter specifies the default camera speed when creating markers.§fNote that independent camera speeds can be specified for each marker.Mirror movement time = distance between two points/mirror movement speed, unit: second
+replaynk.trail.editorform.dorecalculateeasetime=§aDo recalculate all marks' ease time
+replaynk.trail.editorform.dorecalculateeasetime.details=§fIf enabled, will reset the camera speed of all markers in this track preset to the default camera speed and use the default camera speed to calculate the camera time
 
-replaynk.generic.invalidinput="§cInvalid input! Please check your input and try again!"
+replaynk.mark.added=§aSuccessfully added marker!
+replaynk.mark.removed=§aSuccessfully removed marker!
+
+replaynk.mark.editorform.pos=§aPosition(x, y, z)
+replaynk.mark.editorform.rot=§aRotation(rotX,rotZ)
+replaynk.mark.editorform.easetype=§aEase Type(Smoothing Type)
+replaynk.mark.editorform.easetype.details=§fThis option determines how the camera should move to the next marker. Normally, please use linear (LINEAR)
+replaynk.mark.editorform.easetime=§aMirroring Time/Speed
+replaynk.mark.editorform.easetime.details=§fHere you can fill in the time or speed of the mirror. If filling in the time, please add the unit 's' after the number, and if it is the speed, please add the unit 'm/s' after the number. Example: 1.5s(time), 3m/s(speed)
+replaynk.mark.editorform.autoeasetime=§aWhether to recalculate the linear camera time after a position change
+replaynk.mark.editorform.index=§aMarker Index
+replaynk.mark.editorform.index.details=§fThis sequence number specifies the position of the marker in the entire trail. The camera will move smoothly from the marker with a small serial number to the marker with a large serial number
+
+replaynk.mark.invalidpos=§cIllegal position format!
+replaynk.mark.invalidrot=§cIllegal rotation format!
+replaynk.mark.invalidindex=§cIllegal index!
+replaynk.mark.invalideasetime=§cIllegal camera time/speed!
+
+replaynk.generic.invalidinput=§cInvalid input! Please check your input and try again!
