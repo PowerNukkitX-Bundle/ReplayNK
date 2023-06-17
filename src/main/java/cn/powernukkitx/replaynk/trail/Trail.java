@@ -315,7 +315,7 @@ public final class Trail {
                 defaultCameraSpeed = Double.parseDouble(response.getInputResponse(6));
                 if (response.getToggleResponse(8)) {
                     resetAllMarkerSpeed();
-                    computeAllLinearEaseTime(markers, false);
+                    computeAllLinearDistance(markers, false);
                 }
             } catch (Exception e) {
                 player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.generic.invalidinput"));
@@ -348,7 +348,7 @@ public final class Trail {
                 runtimeMarkers.add(p[0]);
             }
 
-            computeAllLinearEaseTime(runtimeMarkers, true);
+            computeAllLinearDistance(runtimeMarkers, true);
         } else {
             runtimeMarkers.addAll(markers);
         }
@@ -361,7 +361,7 @@ public final class Trail {
         }
     }
 
-    private void computeAllLinearEaseTime(List<Marker> markers, boolean doRemoveTooCloseMarker) {
+    private void computeAllLinearDistance(List<Marker> markers, boolean doRemoveTooCloseMarker) {
         boolean first = true;
         for (Iterator<Marker> iterator = markers.iterator(); iterator.hasNext(); ) {
             var marker = iterator.next();
