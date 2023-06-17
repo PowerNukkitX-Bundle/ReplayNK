@@ -95,29 +95,29 @@ public class ReplayCommand extends PluginCommand<ReplayNK> {
                 sender.sendMessage(strBuilder.toString());
                 return 1;
             }
-            case "showbc" -> {
-                var trail = Trail.getOperatingTrail(player);
-                if (trail == null) {
-                    player.sendMessage("§cYou are not operating any trail!");
-                    return 0;
-                }
-                if (!trail.isUseBezierCurves()) {
-                    player.sendMessage("§cThis trail does not use bezier curves!");
-                    return 0;
-                }
-                trail.prepareRuntimeMarkers();
-                var startTime = Server.getInstance().getTick();
-                Server.getInstance().getScheduler().scheduleRepeatingTask(new Task() {
-                    @Override
-                    public void onRun(int currentTick) {
-                        trail.getRuntimeMarkers().forEach(marker -> player.getLevel().addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS));
-                        if (currentTick - startTime >= 200) {
-                            this.cancel();
-                        }
-                    }
-                }, 5);
-                return 1;
-            }
+//            case "showbc" -> {
+//                var trail = Trail.getOperatingTrail(player);
+//                if (trail == null) {
+//                    player.sendMessage("§cYou are not operating any trail!");
+//                    return 0;
+//                }
+//                if (!trail.isUseBezierCurves()) {
+//                    player.sendMessage("§cThis trail does not use bezier curves!");
+//                    return 0;
+//                }
+//                trail.prepareRuntimeMarkers();
+//                var startTime = Server.getInstance().getTick();
+//                Server.getInstance().getScheduler().scheduleRepeatingTask(new Task() {
+//                    @Override
+//                    public void onRun(int currentTick) {
+//                        trail.getRuntimeMarkers().forEach(marker -> player.getLevel().addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS));
+//                        if (currentTick - startTime >= 200) {
+//                            this.cancel();
+//                        }
+//                    }
+//                }, 5);
+//                return 1;
+//            }
             default -> {
                 return 0;
             }

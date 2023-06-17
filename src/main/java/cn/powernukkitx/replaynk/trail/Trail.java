@@ -1,7 +1,6 @@
 package cn.powernukkitx.replaynk.trail;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.api.DoNotModify;
 import cn.nukkit.camera.data.*;
 import cn.nukkit.camera.instruction.impl.ClearInstruction;
@@ -15,8 +14,6 @@ import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.ParticleEffect;
 import cn.nukkit.level.Position;
-import cn.nukkit.level.particle.BlockForceFieldParticle;
-import cn.nukkit.level.particle.BubbleParticle;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.CameraInstructionPacket;
 import cn.nukkit.potion.Effect;
@@ -25,7 +22,6 @@ import cn.powernukkitx.replaynk.entity.MarkerEntity;
 import cn.powernukkitx.replaynk.item.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.Expose;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -50,16 +46,27 @@ public final class Trail {
             .create();
     private static final Map<String, Trail> TRAILS = new HashMap<>();
     private static final Map<Player, Trail> OPERATING_TRAILS = new HashMap<>();
-
-    private final List<Marker> markers = new ArrayList<>();
-    private final String name;
-    @Setter
-    private boolean useBezierCurves = false;
+    private static final double DEFAULT_BEZIER_CURVE_STEP = 0.001;
+    private static final double DEFAULT_MIN_DISTANCE = 0.5;
+    private static final double DEFAULT_CAMERA_SPEED = 2;
 
     private transient Player operator;
     @Setter
     private transient boolean playing;
     private transient List<Marker> runtimeMarkers;
+    @Setter
+    private transient boolean changed;
+
+    private final List<Marker> markers = new ArrayList<>();
+    private final String name;
+    @Setter
+    private boolean useBezierCurves = false;
+    @Setter
+    private boolean showBezierCurves = true;
+    @Setter
+    private double minDistance = DEFAULT_MIN_DISTANCE;
+    @Setter
+    private double defaultCameraSpeed = DEFAULT_CAMERA_SPEED;
 
     private Trail(String name) {
         this.name = name;
@@ -160,6 +167,12 @@ public final class Trail {
         markers.forEach(marker -> marker.spawnDisplayEntity(player.getLevel(), this));
     }
 
+    public void tick() {
+        if (operator != null && useBezierCurves && showBezierCurves && !playing) {
+            getOrCalculateRuntimeMarkers().forEach(marker -> operator.getLevel().addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS));
+        }
+    }
+
     public void clearRuntimeMarkers() {
         if (runtimeMarkers == null) {
             runtimeMarkers = new ArrayList<>();
@@ -168,6 +181,13 @@ public final class Trail {
         if (runtimeMarkers.isEmpty())
             return;
         runtimeMarkers.clear();
+    }
+
+    public List<Marker> getOrCalculateRuntimeMarkers() {
+        if (runtimeMarkers == null || isChanged()) {
+            prepareRuntimeMarkers();
+        }
+        return runtimeMarkers;
     }
 
     private void prepareHotBar(Player player) {
@@ -212,10 +232,15 @@ public final class Trail {
 
     public void addMarker(MarkerBuilder builder) {
         var marker = builder.build(this);
+        addMarker(marker);
+    }
+
+    public void addMarker(Marker marker) {
         markers.add(marker);
         if (operator != null) {
             marker.spawnDisplayEntity(operator.getLevel(), this);
         }
+        setChanged(true);
     }
 
     public void insertMarker(int index, Marker marker) {
@@ -226,6 +251,7 @@ public final class Trail {
         for (int i = index + 1; i < markers.size(); i++) {
             markers.get(i).updateDisplayEntity(this);
         }
+        setChanged(true);
     }
 
     public void removeMarker(int index) {
@@ -234,6 +260,7 @@ public final class Trail {
         for (int i = index; i < markers.size(); i++) {
             markers.get(i).updateDisplayEntity(this);
         }
+        setChanged(true);
     }
 
     public void moveMarker(int oldIndex, int newIndex) {
@@ -242,21 +269,7 @@ public final class Trail {
         for (int i = Math.min(oldIndex, newIndex); i < markers.size(); i++) {
             markers.get(i).updateDisplayEntity(this);
         }
-    }
-
-    public void showEditorForm(Player player) {
-        var useBezierCurvesElement = new ElementToggle("Use Bezier Curves", useBezierCurves);
-        var form = new FormWindowCustom(name, List.of(useBezierCurvesElement));
-        form.addHandler((p, id) -> {
-            var response = form.getResponse();
-            if (response == null) return;
-            try {
-                useBezierCurves = response.getToggleResponse(0);
-            } catch (Exception e) {
-                player.sendMessage("§cInvalid input.");
-            }
-        });
-        player.showFormWindow(form);
+        setChanged(true);
     }
 
     public String toJson() {
@@ -279,15 +292,37 @@ public final class Trail {
         runtimeMarkers.get(0).play(player, this);
     }
 
-    private static final double BEZIER_CURVE_STEP = 0.001;
-    private static final double MIN_DISTANCE = 1;
+    public void showEditorForm(Player player) {
+        var useBezierCurvesElement = new ElementToggle("Use Bezier Curves", useBezierCurves);
+        var showBazierCurvesElement = new ElementToggle("Show Bezier Curves", showBezierCurves);
+        var minDistanceElement = new ElementInput("Minimum Distance Between Two Points", String.valueOf(DEFAULT_MIN_DISTANCE), String.valueOf(minDistance));
+        var cameraSpeedElement = new ElementInput("Default Camera Speed", String.valueOf(DEFAULT_CAMERA_SPEED), String.valueOf(defaultCameraSpeed));
+        var doRecalculateEaseTimeElement = new ElementToggle("Recalculate Ease Time?", true);
+        var form = new FormWindowCustom(name, List.of(useBezierCurvesElement, showBazierCurvesElement, minDistanceElement, cameraSpeedElement, doRecalculateEaseTimeElement));
+        form.addHandler((p, id) -> {
+            var response = form.getResponse();
+            if (response == null) return;
+            try {
+                useBezierCurves = response.getToggleResponse(0);
+                showBezierCurves = response.getToggleResponse(1);
+                minDistance = Double.parseDouble(response.getInputResponse(2));
+                defaultCameraSpeed = Double.parseDouble(response.getInputResponse(3));
+                if (response.getToggleResponse(4)) {
+                    computeAllLinearEaseTime(markers, defaultCameraSpeed, false);
+                }
+            } catch (Exception e) {
+                player.sendMessage("§cInvalid input.");
+            }
+        });
+        player.showFormWindow(form);
+    }
 
     public void prepareRuntimeMarkers() {
         clearRuntimeMarkers();
         if (useBezierCurves) {
             int n = markers.size() - 1;
 
-            for (double u = 0; u <= 1; u += BEZIER_CURVE_STEP) {
+            for (double u = 0; u <= 1; u += DEFAULT_BEZIER_CURVE_STEP) {
                 Marker[] p = new Marker[n + 1];
                 for (int i = 0; i <= n; i++) {
                     p[i] = new Marker(markers.get(i));
@@ -300,28 +335,34 @@ public final class Trail {
                         p[i].z = (1 - u) * p[i].z + u * p[i + 1].z;
                         p[i].rotX = (1 - u) * p[i].rotX + u * p[i + 1].rotX;
                         p[i].rotY = (1 - u) * p[i].rotY + u * p[i + 1].rotY;
+                        //speed
                     }
                 }
                 runtimeMarkers.add(p[0]);
             }
 
-            boolean first = true;
-            for (Iterator<Marker> iterator = runtimeMarkers.iterator(); iterator.hasNext(); ) {
-                var runtimeMarker = iterator.next();
-                if (first) {
-                    first = false;
-                    continue;
-                }
-                var lastRuntimeMarker = runtimeMarkers.get(runtimeMarkers.indexOf(runtimeMarker) - 1);
-                var distance = Math.sqrt(Math.pow(lastRuntimeMarker.x - runtimeMarker.x, 2) + Math.pow(lastRuntimeMarker.y - runtimeMarker.y, 2) + Math.pow(lastRuntimeMarker.z - runtimeMarker.z, 2));
-                if (distance < MIN_DISTANCE) {
-                    iterator.remove();
-                } else {
-                    runtimeMarker.easeTime = distance / 3d;
-                }
-            }
+            computeAllLinearEaseTime(runtimeMarkers, defaultCameraSpeed, true);
         } else {
             runtimeMarkers.addAll(markers);
+        }
+    }
+
+    private void computeAllLinearEaseTime(List<Marker> markers, double cameraSpeed, boolean doRemoveTooCloseMarker) {
+        boolean first = true;
+        for (Iterator<Marker> iterator = markers.iterator(); iterator.hasNext(); ) {
+            var marker = iterator.next();
+            if (first) {
+                first = false;
+                marker.easeTime = 1;
+                continue;
+            }
+            var lastMarker = markers.get(markers.indexOf(marker) - 1);
+            var distance = Math.sqrt(Math.pow(lastMarker.x - marker.x, 2) + Math.pow(lastMarker.y - marker.y, 2) + Math.pow(lastMarker.z - marker.z, 2));
+            if (distance < minDistance && doRemoveTooCloseMarker) {
+                iterator.remove();
+            } else {
+                marker.easeTime = distance / cameraSpeed;
+            }
         }
     }
 
@@ -332,11 +373,6 @@ public final class Trail {
         return true;
     }
 
-    /**
-     * @author daoge_cmd
-     * @date 2023/6/17
-     * ReplayNK Project
-     */
     @Getter
     public static final class Marker {
         private double x;
@@ -349,26 +385,17 @@ public final class Trail {
 
         private transient MarkerEntity markerEntity;
 
-        Marker(double x, double y, double z, double rotX, double rotY, EaseType easeType, double easeTime, Marker lastMarker) {
+        public Marker(double x, double y, double z, double rotX, double rotY, EaseType easeType, double easeTime) {
             this.x = x;
             this.y = y;
             this.z = z;
             this.rotX = rotX;
             this.rotY = rotY;
             this.easeType = easeType;
-            if (easeTime < 0) {
-                if (lastMarker != null) {
-                    var distance = Math.sqrt(Math.pow(lastMarker.x - x, 2) + Math.pow(lastMarker.y - y, 2) + Math.pow(lastMarker.z - z, 2));
-                    this.easeTime = distance / 3d;
-                } else {
-                    this.easeTime = 0;
-                }
-            } else {
-                this.easeTime = easeTime;
-            }
+            this.easeTime = easeTime;
         }
 
-        Marker(Marker marker) {
+        public Marker(Marker marker) {
             this.x = marker.x;
             this.y = marker.y;
             this.z = marker.z;
@@ -376,6 +403,11 @@ public final class Trail {
             this.rotY = marker.rotY;
             this.easeType = marker.easeType;
             this.easeTime = marker.easeTime;
+        }
+
+        public void computeLinearEaseTime(Marker lastMarker, double cameraSpeed) {
+            var distance = Math.sqrt(Math.pow(lastMarker.x - x, 2) + Math.pow(lastMarker.y - y, 2) + Math.pow(lastMarker.z - z, 2));
+            this.easeTime = distance / cameraSpeed;
         }
 
         public static MarkerBuilder builder() {
@@ -426,8 +458,9 @@ public final class Trail {
             var rotElement = new ElementInput("Rot", "Enter the new rot", rotX + "," + rotY);
             var easeTypeElement = new ElementDropdown("EaseType", Arrays.stream(EaseType.values()).map(EaseType::getType).toList(), 0);
             var easeTimeElement = new ElementInput("EaseTime", "Enter the new ease time", String.valueOf(this.easeTime));
+            var autoEaseTimeElement = new ElementToggle("Automatically recalculate the ease time if pos changed?", true);
             var indexElement = new ElementInput("Index", "Enter the new index", String.valueOf(markers.indexOf(this)));
-            var form = new FormWindowCustom("Marker - " + markers.indexOf(this), List.of(posElement, rotElement, easeTypeElement, easeTimeElement, indexElement));
+            var form = new FormWindowCustom("Marker - " + markers.indexOf(this), List.of(posElement, rotElement, easeTypeElement, easeTimeElement, autoEaseTimeElement, indexElement));
             form.addHandler((p, id) -> {
                 var response = form.getResponse();
                 if (response == null) return;
@@ -450,10 +483,18 @@ public final class Trail {
                     rotY = Double.parseDouble(rot[1]);
 
                     easeType = EaseType.valueOf(response.getDropdownResponse(2).getElementContent().toUpperCase());
-                    //TODO: auto recal time
                     easeTime = Double.parseDouble(response.getInputResponse(3));
 
-                    var newIndex = Integer.parseInt(response.getInputResponse(4));
+                    var autoEaseTime = response.getToggleResponse(4);
+                    if (autoEaseTime) {
+                        var index = markers.indexOf(this);
+                        if (index > 0) {
+                            var lastMarker = markers.get(index - 1);
+                            computeLinearEaseTime(lastMarker, trail.getDefaultCameraSpeed());
+                        }
+                    }
+
+                    var newIndex = Integer.parseInt(response.getInputResponse(5));
                     if (newIndex < 0 || newIndex >= markers.size()) {
                         player.sendMessage("§cInvalid index.");
                         return;
@@ -480,7 +521,7 @@ public final class Trail {
                     .preset(preset)
                     .pos(new Pos((float) x, (float) y, (float) z))
                     .rot(new Rot((float) rotX, (float) rotY))
-                    .ease(new Ease((float) easeTime, EaseType.LINEAR))
+                    .ease(new Ease((float) easeTime, easeType))
                     .build());
             player.dataPacket(pk);
             CompletableFuture.runAsync(() -> {
@@ -530,7 +571,7 @@ public final class Trail {
         private double rotX = 0;
         private double rotY = 0;
         private EaseType easeType = EaseType.LINEAR;
-        private double easeTime = -1;
+        private double easeTime = 1;
 
         MarkerBuilder() {
         }
@@ -572,11 +613,20 @@ public final class Trail {
 
         public Marker build(Trail trail) {
             var markers = trail.getMarkers();
-            return new Marker(this.x, this.y, this.z, this.rotX, this.rotY, this.easeType, this.easeTime, markers.size() > 0 ? markers.get(markers.size() - 1) : null);
+            var marker = new Marker(this.x, this.y, this.z, this.rotX, this.rotY, this.easeType, this.easeTime);
+            if (markers.size() > 0) {
+                var lastMarker = markers.get(markers.size() - 1);
+                marker.computeLinearEaseTime(lastMarker, trail.getDefaultCameraSpeed());
+            } else {
+                marker.easeTime = 1;
+            }
+            return marker;
         }
 
-        public Marker build(Marker lastMarker) {
-            return new Marker(this.x, this.y, this.z, this.rotX, this.rotY, this.easeType, this.easeTime, lastMarker);
+        public Marker build(Marker lastMarker, double cameraSpeed) {
+            var marker = new Marker(this.x, this.y, this.z, this.rotX, this.rotY, this.easeType, this.easeTime);
+            marker.computeLinearEaseTime(lastMarker, cameraSpeed);
+            return marker;
         }
     }
 }

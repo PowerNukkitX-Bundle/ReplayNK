@@ -28,6 +28,7 @@ import java.util.Map;
  */
 public final class ReplayNK extends PluginBase implements Listener {
 
+    public static final int TRAIL_TICK_PERIOD = 5;
     @Getter
     private static ReplayNK instance = null;
 
@@ -52,6 +53,12 @@ public final class ReplayNK extends PluginBase implements Listener {
         Server.getInstance().getPluginManager().registerEvents(this, this);
         Server.getInstance().getCommandMap().register("", new ReplayCommand(this));
         Trail.readAllTrails();
+
+        Server.getInstance().getScheduler().scheduleRepeatingTask(this, () -> {
+            for (var trail : Trail.getTrails().values()) {
+                trail.tick();
+            }
+        }, TRAIL_TICK_PERIOD);
     }
 
     @Override
