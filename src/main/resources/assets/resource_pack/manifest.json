@@ -1,0 +1,39 @@
+{
+	"format_version": 2,
+	"metadata": {
+		"generated_with": {
+			"bridge": [
+				"2.2.13"
+			],
+			"dash": [
+				"0.8.18"
+			]
+		}
+	},
+	"header": {
+		"name": "Resource Pack For ReplayNK",
+		"description": "https://github.com/PowerNukkitX/ReplayNK",
+		"min_engine_version": [
+			1,
+			19,
+			0
+		],
+		"uuid": "d47de640-954b-41e7-8937-1b97cfdf08e1",
+		"version": [
+			1,
+			0,
+			0
+		]
+	},
+	"modules": [
+		{
+			"type": "resources",
+			"uuid": "ab09c50f-5860-4676-bad9-73bc93b80165",
+			"version": [
+				1,
+				0,
+				0
+			]
+		}
+	]
+}

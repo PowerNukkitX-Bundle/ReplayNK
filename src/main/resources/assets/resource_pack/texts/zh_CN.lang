@@ -1,0 +1,8 @@
+entity.replaynk:marker.name=路径点
+item.replaynk:play.name=开始播放
+item.replaynk:pause.name=暂停播放
+item.replaynk:add_marker.name=创建路径点
+item.replaynk:exit.name=退出
+item.replaynk:clear_marker.name=删除路径点
+item.replaynk:edit_marker.name=修改路径点
+item.replaynk:setting.name=设置

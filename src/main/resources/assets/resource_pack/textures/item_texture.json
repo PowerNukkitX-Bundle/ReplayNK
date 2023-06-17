@@ -1,0 +1,27 @@
+{
+	"resource_pack_name": "Resource Pack For ReplayNK",
+	"texture_name": "atlas.items",
+	"texture_data": {
+		"replaynk_play": {
+			"textures": "textures/items/play_item_texture"
+		},
+		"replaynk_pause": {
+			"textures": "textures/items/pause_item_texture"
+		},
+		"replaynk_add_marker": {
+			"textures": "textures/items/add_marker_item_texture"
+		},
+		"replaynk_exit": {
+			"textures": "textures/items/exit_item_texture"
+		},
+		"replaynk_clear_marker": {
+			"textures": "textures/items/clear_item_texture"
+		},
+		"replaynk_edit_marker": {
+			"textures": "textures/items/edit_marker_item_texture"
+		},
+		"replaynk_setting": {
+			"textures": "textures/items/setting_item_texture"
+		}
+	}
+}

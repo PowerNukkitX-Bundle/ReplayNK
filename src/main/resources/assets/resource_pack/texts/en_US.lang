@@ -1,0 +1,8 @@
+entity.replaynk:marker.name=Marker
+item.replaynk:play.name=Start Trailer
+item.replaynk:pause.name=Stop Trailer
+item.replaynk:add_marker.name=Create Marker
+item.replaynk:exit.name=Exit
+item.replaynk:clear_marker.name=Clear Marker
+item.replaynk:edit_marker.name=Edit Marker
+item.replaynk:setting.name=Setting
