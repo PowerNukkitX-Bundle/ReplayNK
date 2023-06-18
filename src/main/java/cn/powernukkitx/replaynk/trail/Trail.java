@@ -2,6 +2,7 @@ package cn.powernukkitx.replaynk.trail;
 
 import cn.nukkit.Player;
 import cn.nukkit.api.DoNotModify;
+import cn.nukkit.form.element.ElementDropdown;
 import cn.nukkit.form.element.ElementInput;
 import cn.nukkit.form.element.ElementLabel;
 import cn.nukkit.form.element.ElementToggle;
@@ -36,7 +37,6 @@ public final class Trail {
             .create();
     private static final Map<String, Trail> TRAILS = new HashMap<>();
     private static final Map<Player, Trail> OPERATING_TRAILS = new HashMap<>();
-    public static final double DEFAULT_BEZIER_CURVE_STEP = 0.001;
     public static final double DEFAULT_MIN_DISTANCE = 0.5;
     public static final double DEFAULT_CAMERA_SPEED = 2;
     public static final double DEFAULT_CAMERA_SPEED_MULTIPLE = 1;
@@ -49,15 +49,15 @@ public final class Trail {
     @Setter
     private transient boolean changed;
     @Setter
-    private boolean useBezierCurves = true;
-    @Setter
-    private boolean showBezierCurves = true;
+    private boolean showTrail = true;
     @Setter
     private double minDistance = DEFAULT_MIN_DISTANCE;
     @Setter
     private double defaultCameraSpeed = DEFAULT_CAMERA_SPEED;
     @Setter
     private double cameraSpeedMultiple = DEFAULT_CAMERA_SPEED_MULTIPLE;
+    @Setter
+    private Interpolator interpolator = Interpolator.BEZIER_CURVES;
 
     private Trail(String name) {
         this.name = name;
@@ -159,7 +159,7 @@ public final class Trail {
     }
 
     public void tick() {
-        if (operator != null && useBezierCurves && showBezierCurves && !playing) {
+        if (operator != null && showTrail && !playing) {
             getOrCalculateRuntimeMarkers().forEach(marker -> operator.getLevel().addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS));
         }
     }
@@ -286,10 +286,10 @@ public final class Trail {
 
     public void showEditorForm(Player player) {
         var langCode = player.getLanguageCode();
-        var useBezierCurvesElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.usebeziercurves"), useBezierCurves);
-        var useBezierCurvesDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.usebeziercurves.details"));
-        var showBazierCurvesElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showbeziercurves"), showBezierCurves);
-        var showBazierCurvesDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showbeziercurves.details"));
+        var interpolatorElement = new ElementDropdown(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.interpolator"), Interpolator.INTERPOLATOR_NAMES, Interpolator.INTERPOLATOR_NAMES.indexOf(interpolator.name().toLowerCase()));
+        var interpolatorDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.interpolator.details"));
+        var showTrailElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showtrail"), showTrail);
+        var showTrailDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showtrail.details"));
         var minDistanceElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.mindistance"), String.valueOf(DEFAULT_MIN_DISTANCE), String.valueOf(minDistance));
         var minDistanceDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.mindistance.details"));
         var defaultCameraSpeedElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.defaultcameraspeed"), String.valueOf(DEFAULT_CAMERA_SPEED), String.valueOf(defaultCameraSpeed));
@@ -298,19 +298,19 @@ public final class Trail {
         var doRecalculateEaseTimeDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.dorecalculateeasetime.details"));
         var cameraSpeedMultipleElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.cameraspeedmultiple"), String.valueOf(DEFAULT_CAMERA_SPEED_MULTIPLE), String.valueOf(cameraSpeedMultiple));
         var cameraSpeedMultipleDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.cameraspeedmultiple.details"));
-        var form = new FormWindowCustom(name, List.of(useBezierCurvesElement, useBezierCurvesDetailsElement, showBazierCurvesElement, showBazierCurvesDetailsElement, minDistanceElement, minDistanceDetailsElement, defaultCameraSpeedElement, defaultCameraSpeedDetailsElement, doRecalculateEaseTimeElement, doRecalculateEaseTimeDetailsElement, cameraSpeedMultipleElement, cameraSpeedMultipleDetailsElement));
+        var form = new FormWindowCustom(name, List.of(interpolatorElement, interpolatorDetailsElement, showTrailElement, showTrailDetailsElement, minDistanceElement, minDistanceDetailsElement, defaultCameraSpeedElement, defaultCameraSpeedDetailsElement, doRecalculateEaseTimeElement, doRecalculateEaseTimeDetailsElement, cameraSpeedMultipleElement, cameraSpeedMultipleDetailsElement));
         form.addHandler((p, id) -> {
             var response = form.getResponse();
             if (response == null) return;
             try {
-                useBezierCurves = response.getToggleResponse(0);
-                showBezierCurves = response.getToggleResponse(2);
+                interpolator = Interpolator.valueOf(response.getDropdownResponse(0).getElementContent().toUpperCase());
+                showTrail = response.getToggleResponse(2);
                 minDistance = Double.parseDouble(response.getInputResponse(4));
                 setChanged(true);
                 defaultCameraSpeed = Double.parseDouble(response.getInputResponse(6));
                 if (response.getToggleResponse(8)) {
                     resetAllMarkerSpeed();
-                    computeAllLinearDistance(markers, false);
+                    computeAllLinearDistance(markers, false, minDistance);
                 }
                 var multiple = Double.parseDouble(response.getInputResponse(10));
                 if (multiple <= 0) {
@@ -326,38 +326,8 @@ public final class Trail {
 
     public void prepareRuntimeMarkers() {
         clearRuntimeMarkers();
-        if (useBezierCurves) {
-            int n = markers.size() - 1;
-
-            for (double u = 0; u <= 1; u += DEFAULT_BEZIER_CURVE_STEP) {
-                Marker[] p = new Marker[n + 1];
-                for (int i = 0; i <= n; i++) {
-                    var cloned = new Marker(markers.get(i));
-                    cloned.setCameraSpeed(cloned.getCameraSpeed() * cameraSpeedMultiple);
-                    p[i] = cloned;
-                }
-
-                for (int r = 1; r <= n; r++) {
-                    for (int i = 0; i <= n - r; i++) {
-                        p[i].setX((1 - u) * p[i].getX() + u * p[i + 1].getX());
-                        p[i].setY((1 - u) * p[i].getY() + u * p[i + 1].getY());
-                        p[i].setZ((1 - u) * p[i].getZ() + u * p[i + 1].getZ());
-                        p[i].setRotX((1 - u) * p[i].getRotX() + u * p[i + 1].getRotX());
-                        p[i].setRotY((1 - u) * p[i].getRotY() + u * p[i + 1].getRotY());
-                        p[i].setCameraSpeed((1 - u) * p[i].getCameraSpeed() + u * p[i + 1].getCameraSpeed());
-                    }
-                }
-                runtimeMarkers.add(p[0]);
-            }
-
-            computeAllLinearDistance(runtimeMarkers, true);
-        } else {
-            for (var marker : markers) {
-                var cloned = new Marker(marker);
-                cloned.setCameraSpeed(cloned.getCameraSpeed() * cameraSpeedMultiple);
-                runtimeMarkers.add(cloned);
-            }
-        }
+        runtimeMarkers = interpolator.interpolator(markers, minDistance);
+        runtimeMarkers.forEach(marker -> marker.setCameraSpeed(marker.getCameraSpeed() * cameraSpeedMultiple));
         cacheIndexForRuntimeMarkers();
     }
 
@@ -367,7 +337,21 @@ public final class Trail {
         }
     }
 
-    private void computeAllLinearDistance(List<Marker> markers, boolean doRemoveTooCloseMarker) {
+    private void cacheIndexForRuntimeMarkers() {
+        //为runtime marker缓存index，提高运镜时流畅度
+        for (int i = 0; i < runtimeMarkers.size(); i++) {
+            runtimeMarkers.get(i).cacheIndex(i);
+        }
+    }
+
+    public boolean pause() {
+        if (!playing)
+            return false;
+        playing = false;
+        return true;
+    }
+
+    public static void computeAllLinearDistance(List<Marker> markers, boolean doRemoveTooCloseMarker, double minDistance) {
         boolean first = true;
         for (Iterator<Marker> iterator = markers.iterator(); iterator.hasNext(); ) {
             var marker = iterator.next();
@@ -386,19 +370,4 @@ public final class Trail {
             }
         }
     }
-
-    private void cacheIndexForRuntimeMarkers() {
-        //为runtime marker缓存index，提高运镜时流畅度
-        for (int i = 0; i < runtimeMarkers.size(); i++) {
-            runtimeMarkers.get(i).cacheIndex(i);
-        }
-    }
-
-    public boolean pause() {
-        if (!playing)
-            return false;
-        playing = false;
-        return true;
-    }
-
 }

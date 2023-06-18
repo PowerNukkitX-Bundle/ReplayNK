@@ -19,6 +19,7 @@ public class AddMarkerItem extends ReplayNKItem {
     public void onInteract(Player player) {
         if (!Trail.isOperatingTrail(player)) {
             player.sendMessage(ReplayNK.getI18n().tr(player.getLanguageCode(), "replaynk.trail.notoperatingtrail"));
+            return;
         }
         var trail = Trail.getOperatingTrail(player);
         var location = player.getLocation();

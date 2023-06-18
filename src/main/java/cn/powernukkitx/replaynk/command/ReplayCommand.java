@@ -18,7 +18,8 @@ import java.util.Map;
  */
 public class ReplayCommand extends PluginCommand<ReplayNK> {
     public ReplayCommand(ReplayNK plugin) {
-        super("replay", "replaynk.command.replay.description", plugin);
+        super("replaynk", "replaynk.command.replay.description", plugin);
+        setAliases(new String[]{"replay", "rp", "rpnk"});
         setPermission("replaynk.command.replay");
         commandParameters.clear();
         commandParameters.put("operate", new CommandParameter[]{

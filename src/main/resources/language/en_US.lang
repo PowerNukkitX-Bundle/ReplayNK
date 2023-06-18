@@ -16,10 +16,10 @@ replaynk.trail.notoperatingtrail=§cYou are not operating any trail!
 replaynk.trail.notplayingtrail=§cYou are not playing any trail!
 replaynk.trail.paused=§aPlaying stopped!
 
-replaynk.trail.editorform.usebeziercurves=§aUse bezier curves
-replaynk.trail.editorform.usebeziercurves.details=§fIf enabled, trail will be smoothed using bezier curves
-replaynk.trail.editorform.showbeziercurves=§aShow bezier curves
-replaynk.trail.editorform.showbeziercurves.details=§fIf enabled, bezier curves will be shown by particle
+replaynk.trail.editorform.interpolator=§aInterpolator
+replaynk.trail.editorform.interpolator.details=§fSpecify an interpolator to use for smoothing the trail
+replaynk.trail.editorform.showtrail=§aShow trail
+replaynk.trail.editorform.showtrail.details=§fIf on, will display the calculated trail with particles. Note that when the interpolator is selected as linear, the trail will not be displayed
 replaynk.trail.editorform.mindistance=§aMin distance between two marks
 replaynk.trail.editorform.mindistance.details=§fThis parameter specifies the minimum distance between two markers, and markers whose distance from the previous marker is less than this value will be deleted. §fIf the Bezier curve smoothing function is turned on, the calculated distance between marker points will be equal to this value
 replaynk.trail.editorform.defaultcameraspeed=§aDefault camera speed
