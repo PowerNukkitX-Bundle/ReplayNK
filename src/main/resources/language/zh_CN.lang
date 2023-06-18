@@ -26,6 +26,8 @@ replaynk.trail.editorform.defaultcameraspeed=§a默认运镜速度
 replaynk.trail.editorform.defaultcameraspeed.details=§f此参数指定了创建标记点时的默认运镜速度。§f请注意，可以为每个标记点指定独立的运镜时间。运镜时间=两点距离/运镜速度，单位:秒
 replaynk.trail.editorform.dorecalculateeasetime=§a是否重新计算所有标记点的运镜时间
 replaynk.trail.editorform.dorecalculateeasetime.details=§f若启用，将会重置此轨迹预设中的所有标记点的运镜速度为默认运镜速度并使用默认运镜速度计算运镜时间
+replaynk.trail.editorform.cameraspeedmultiple=§a默认运镜速度倍数
+replaynk.trail.editorform.cameraspeedmultiple.details=§f此参数指定了轨迹播放的倍速。例如当你将其设置为2，所有标记点的实际运镜速度将会变为原来的2倍。
 
 replaynk.mark.added=§a成功添加标记点!
 replaynk.mark.removed=§a成功移除标记点!

@@ -39,6 +39,7 @@ public final class Trail {
     public static final double DEFAULT_BEZIER_CURVE_STEP = 0.001;
     public static final double DEFAULT_MIN_DISTANCE = 0.5;
     public static final double DEFAULT_CAMERA_SPEED = 2;
+    public static final double DEFAULT_CAMERA_SPEED_MULTIPLE = 1;
     private final List<Marker> markers = new ArrayList<>();
     private final String name;
     private transient Player operator;
@@ -48,13 +49,15 @@ public final class Trail {
     @Setter
     private transient boolean changed;
     @Setter
-    private boolean useBezierCurves = false;
+    private boolean useBezierCurves = true;
     @Setter
     private boolean showBezierCurves = true;
     @Setter
     private double minDistance = DEFAULT_MIN_DISTANCE;
     @Setter
     private double defaultCameraSpeed = DEFAULT_CAMERA_SPEED;
+    @Setter
+    private double cameraSpeedMultiple = DEFAULT_CAMERA_SPEED_MULTIPLE;
 
     private Trail(String name) {
         this.name = name;
@@ -293,7 +296,9 @@ public final class Trail {
         var defaultCameraSpeedDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.defaultcameraspeed.details"));
         var doRecalculateEaseTimeElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.dorecalculateeasetime"), false);
         var doRecalculateEaseTimeDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.dorecalculateeasetime.details"));
-        var form = new FormWindowCustom(name, List.of(useBezierCurvesElement, useBezierCurvesDetailsElement, showBazierCurvesElement, showBazierCurvesDetailsElement, minDistanceElement, minDistanceDetailsElement, defaultCameraSpeedElement, defaultCameraSpeedDetailsElement, doRecalculateEaseTimeElement, doRecalculateEaseTimeDetailsElement));
+        var cameraSpeedMultipleElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.cameraspeedmultiple"), String.valueOf(DEFAULT_CAMERA_SPEED_MULTIPLE), String.valueOf(cameraSpeedMultiple));
+        var cameraSpeedMultipleDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.cameraspeedmultiple.details"));
+        var form = new FormWindowCustom(name, List.of(useBezierCurvesElement, useBezierCurvesDetailsElement, showBazierCurvesElement, showBazierCurvesDetailsElement, minDistanceElement, minDistanceDetailsElement, defaultCameraSpeedElement, defaultCameraSpeedDetailsElement, doRecalculateEaseTimeElement, doRecalculateEaseTimeDetailsElement, cameraSpeedMultipleElement, cameraSpeedMultipleDetailsElement));
         form.addHandler((p, id) -> {
             var response = form.getResponse();
             if (response == null) return;
@@ -307,6 +312,11 @@ public final class Trail {
                     resetAllMarkerSpeed();
                     computeAllLinearDistance(markers, false);
                 }
+                var multiple = Double.parseDouble(response.getInputResponse(10));
+                if (multiple <= 0) {
+                    throw new IllegalArgumentException();
+                }
+                this.cameraSpeedMultiple = multiple;
             } catch (Exception e) {
                 player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.generic.invalidinput"));
             }
@@ -322,7 +332,9 @@ public final class Trail {
             for (double u = 0; u <= 1; u += DEFAULT_BEZIER_CURVE_STEP) {
                 Marker[] p = new Marker[n + 1];
                 for (int i = 0; i <= n; i++) {
-                    p[i] = new Marker(markers.get(i));
+                    var cloned = new Marker(markers.get(i));
+                    cloned.setCameraSpeed(cloned.getCameraSpeed() * cameraSpeedMultiple);
+                    p[i] = cloned;
                 }
 
                 for (int r = 1; r <= n; r++) {
@@ -340,7 +352,11 @@ public final class Trail {
 
             computeAllLinearDistance(runtimeMarkers, true);
         } else {
-            runtimeMarkers.addAll(markers);
+            for (var marker : markers) {
+                var cloned = new Marker(marker);
+                cloned.setCameraSpeed(cloned.getCameraSpeed() * cameraSpeedMultiple);
+                runtimeMarkers.add(cloned);
+            }
         }
         cacheIndexForRuntimeMarkers();
     }

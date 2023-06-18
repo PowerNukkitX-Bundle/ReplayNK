@@ -270,7 +270,10 @@ public final class Marker {
         if (runtimeMarkers.indexOf(this) != 0) {
             try {
                 //提前25ms以避免卡顿
-                Thread.sleep((long) (easeTime * 1000) - 25);
+                var sleepTime = (long) (easeTime * 1000) - 25;
+                if (sleepTime > 0) {
+                    Thread.sleep(sleepTime);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
