@@ -4,7 +4,6 @@ import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
 import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.entity.MarkerEntity;
-import cn.powernukkitx.replaynk.trail.Marker;
 import cn.powernukkitx.replaynk.trail.Trail;
 
 /**

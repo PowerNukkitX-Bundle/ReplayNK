@@ -31,14 +31,14 @@ import java.util.*;
 @Log4j2
 public final class Trail {
 
+    public static final double DEFAULT_MIN_DISTANCE = 0.5;
+    public static final double DEFAULT_CAMERA_SPEED = 2;
+    public static final double DEFAULT_CAMERA_SPEED_MULTIPLE = 1;
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .create();
     private static final Map<String, Trail> TRAILS = new HashMap<>();
     private static final Map<Player, Trail> OPERATING_TRAILS = new HashMap<>();
-    public static final double DEFAULT_MIN_DISTANCE = 0.5;
-    public static final double DEFAULT_CAMERA_SPEED = 2;
-    public static final double DEFAULT_CAMERA_SPEED_MULTIPLE = 1;
     private final List<Marker> markers = new ArrayList<>();
     private final String name;
     private transient Player operator;
@@ -160,6 +160,26 @@ public final class Trail {
         var trail = GSON.fromJson(json, Trail.class);
         addTrail(trail);
         return trail;
+    }
+
+    public static void computeAllLinearDistance(List<Marker> markers, boolean doRemoveTooCloseMarker, double minDistance) {
+        boolean first = true;
+        for (Iterator<Marker> iterator = markers.iterator(); iterator.hasNext(); ) {
+            var marker = iterator.next();
+            if (first) {
+                first = false;
+                marker.setDistance(1);
+                marker.setCameraSpeed(1);
+                continue;
+            }
+            var lastMarker = markers.get(markers.indexOf(marker) - 1);
+            var distance = Math.sqrt(Math.pow(lastMarker.getX() - marker.getX(), 2) + Math.pow(lastMarker.getY() - marker.getY(), 2) + Math.pow(lastMarker.getZ() - marker.getZ(), 2));
+            if (distance < minDistance && doRemoveTooCloseMarker) {
+                iterator.remove();
+            } else {
+                marker.setDistance(distance);
+            }
+        }
     }
 
     public void startOperating(Player player) {
@@ -350,7 +370,23 @@ public final class Trail {
         var cameraSpeedMultipleDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.cameraspeedmultiple.details"));
         var showMarkerEntityToAllPlayersElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showmarkerentitytoallplayers"), showMarkerEntityToAllPlayers);
         var showMarkerEntityToAllPlayersDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showmarkerentitytoallplayers.details"));
-        var form = new FormWindowCustom(name, List.of(interpolatorElement, interpolatorDetailsElement, showTrailElement, showTrailDetailsElement, showMarkerDirectionElement, showMarkerDirectionDetailsElement, minDistanceElement, minDistanceDetailsElement, defaultCameraSpeedElement, defaultCameraSpeedDetailsElement, doRecalculateEaseTimeElement, doRecalculateEaseTimeDetailsElement, cameraSpeedMultipleElement, cameraSpeedMultipleDetailsElement, showMarkerEntityToAllPlayersElement, showMarkerEntityToAllPlayersDetailsElement));
+        var form = new FormWindowCustom(name, List.of(
+                interpolatorElement,
+                interpolatorDetailsElement,
+                showTrailElement,
+                showTrailDetailsElement,
+                showMarkerDirectionElement,
+                showMarkerDirectionDetailsElement,
+                minDistanceElement,
+                minDistanceDetailsElement,
+                defaultCameraSpeedElement,
+                defaultCameraSpeedDetailsElement,
+                doRecalculateEaseTimeElement,
+                doRecalculateEaseTimeDetailsElement,
+                cameraSpeedMultipleElement,
+                cameraSpeedMultipleDetailsElement,
+                showMarkerEntityToAllPlayersElement,
+                showMarkerEntityToAllPlayersDetailsElement));
         form.addHandler((p, id) -> {
             var response = form.getResponse();
             if (response == null) return;
@@ -415,25 +451,5 @@ public final class Trail {
         playing = false;
         //TODO: 主动使玩家脱离控制
         return true;
-    }
-
-    public static void computeAllLinearDistance(List<Marker> markers, boolean doRemoveTooCloseMarker, double minDistance) {
-        boolean first = true;
-        for (Iterator<Marker> iterator = markers.iterator(); iterator.hasNext(); ) {
-            var marker = iterator.next();
-            if (first) {
-                first = false;
-                marker.setDistance(1);
-                marker.setCameraSpeed(1);
-                continue;
-            }
-            var lastMarker = markers.get(markers.indexOf(marker) - 1);
-            var distance = Math.sqrt(Math.pow(lastMarker.getX() - marker.getX(), 2) + Math.pow(lastMarker.getY() - marker.getY(), 2) + Math.pow(lastMarker.getZ() - marker.getZ(), 2));
-            if (distance < minDistance && doRemoveTooCloseMarker) {
-                iterator.remove();
-            } else {
-                marker.setDistance(distance);
-            }
-        }
     }
 }

@@ -81,22 +81,6 @@ public enum Interpolator {
     };
 
     public static final List<String> INTERPOLATOR_NAMES = Arrays.stream(values()).map(interpolator -> interpolator.name().toLowerCase()).toList();
-
-    /**
-     * 调用此方法即已保证markers.size() >= 2
-     */
-    public List<Marker> interpolator(List<Marker> markers, double minDistance) {
-        throw new UnsupportedOperationException();
-    }
-
-    public void showParticle(List<Marker> markers, Level level, boolean showDirection) {
-        markers.forEach(marker -> {
-            level.addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS);
-            if (showDirection)
-                Marker.spawnDirectionParticle(marker.getVector3(), marker.getRotX(), marker.getRotY(), level);
-        });
-    }
-
     private static final double DEFAULT_BEZIER_CURVE_STEP = 0.001;
 
     private static List<Marker> bezier(List<Marker> markers, double minDistance) {
@@ -124,5 +108,20 @@ public enum Interpolator {
             runtimeMarkers.add(p[0]);
         }
         return runtimeMarkers;
+    }
+
+    /**
+     * 调用此方法即已保证markers.size() >= 2
+     */
+    public List<Marker> interpolator(List<Marker> markers, double minDistance) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void showParticle(List<Marker> markers, Level level, boolean showDirection) {
+        markers.forEach(marker -> {
+            level.addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS);
+            if (showDirection)
+                Marker.spawnDirectionParticle(marker.getVector3(), marker.getRotX(), marker.getRotY(), level);
+        });
     }
 }

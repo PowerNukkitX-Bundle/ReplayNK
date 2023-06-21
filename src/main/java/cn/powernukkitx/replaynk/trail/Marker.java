@@ -91,6 +91,23 @@ public final class Marker {
         computeEaseTime();
     }
 
+    public static void spawnDirectionParticle(Vector3 pos, double rotX, double rotY, Level level) {
+        var pk = new SpawnParticleEffectPacket();
+        pk.dimensionId = level.getDimensionData().getDimensionId();
+        pk.uniqueEntityId = -1;
+        pk.identifier = "replaynk:arrow";
+        pk.position = pos.asVector3f();
+        var facing = BVector3.fromAngle(rotY, rotX).add(pos).getDirectionVector();
+        pk.molangVariablesJson = ("[{\"name\":\"variable.x\",\"value\":{\"type\":\"float\",\"value\":" +
+                                  facing.x +
+                                  "}},{\"name\":\"variable.y\",\"value\":{\"type\":\"float\",\"value\":" +
+                                  facing.y +
+                                  "}},{\"name\":\"variable.z\",\"value\":{\"type\":\"float\",\"value\":" +
+                                  facing.z +
+                                  "}}]").describeConstable();
+        level.addChunkPacket((int) pos.x >> 4, (int) pos.z >> 4, pk);
+    }
+
     public void cacheIndex(int cachedIndex) {
         if (!runtimeMark)
             throw new IllegalStateException("Only runtime mark can cache index!");
@@ -172,24 +189,6 @@ public final class Marker {
 
     public boolean isDisplayEntitySpawned() {
         return markerEntity != null;
-    }
-
-    public static void spawnDirectionParticle(Vector3 pos, double rotX, double rotY, Level level) {
-        var pk = new SpawnParticleEffectPacket();
-        pk.dimensionId = level.getDimensionData().getDimensionId();
-        pk.uniqueEntityId = -1;
-        pk.identifier = "replaynk:arrow";
-        pk.position = pos.asVector3f();
-        var facing = BVector3.fromAngle(rotY, rotX).add(pos).getDirectionVector();
-        pk.molangVariablesJson = new StringBuilder()
-                .append("[{\"name\":\"variable.x\",\"value\":{\"type\":\"float\",\"value\":")
-                .append(facing.x)
-                .append("}},{\"name\":\"variable.y\",\"value\":{\"type\":\"float\",\"value\":")
-                .append(facing.y)
-                .append("}},{\"name\":\"variable.z\",\"value\":{\"type\":\"float\",\"value\":")
-                .append(facing.z)
-                .append("}}]").toString().describeConstable();
-        level.addChunkPacket((int) pos.x >> 4, (int) pos.z >> 4, pk);
     }
 
     public void showEditorForm(Player player, Trail trail) {
