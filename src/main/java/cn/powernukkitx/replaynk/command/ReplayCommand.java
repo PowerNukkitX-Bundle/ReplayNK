@@ -1,11 +1,15 @@
 package cn.powernukkitx.replaynk.command;
 
+import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.command.tree.ParamList;
 import cn.nukkit.command.utils.CommandLogger;
+import cn.nukkit.math.BVector3;
+import cn.nukkit.math.VectorMath;
+import cn.nukkit.network.protocol.SpawnParticleEffectPacket;
 import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.trail.Trail;
 
@@ -36,6 +40,9 @@ public class ReplayCommand extends PluginCommand<ReplayNK> {
         });
         commandParameters.put("list", new CommandParameter[]{
                 CommandParameter.newEnum("list", new String[]{"list"}),
+        });
+        commandParameters.put("test", new CommandParameter[]{
+                CommandParameter.newEnum("test", new String[]{"test"}),
         });
         enableParamTree();
     }
@@ -91,6 +98,24 @@ public class ReplayCommand extends PluginCommand<ReplayNK> {
                     strBuilder.append(trail.getName()).append(" ");
                 }
                 log.addMessage("replaynk.command.replay.list", strBuilder.toString()).output();
+                return 1;
+            }
+            case "test" -> {
+                var pk = new SpawnParticleEffectPacket();
+                pk.dimensionId = player.getLevel().getDimensionData().getDimensionId();
+                pk.uniqueEntityId = -1;
+                pk.position = player.getPosition().asVector3f();
+                pk.identifier = "replaynk:arrow";
+                var facing = BVector3.fromAngle(player.getYaw(), player.getPitch()).add(player).getDirectionVector();
+                pk.molangVariablesJson = new StringBuilder()
+                        .append("[{\"name\":\"variable.x\",\"value\":{\"type\":\"float\",\"value\":")
+                        .append(facing.x)
+                        .append("}},{\"name\":\"variable.y\",\"value\":{\"type\":\"float\",\"value\":")
+                        .append(facing.y)
+                        .append("}},{\"name\":\"variable.z\",\"value\":{\"type\":\"float\",\"value\":")
+                        .append(facing.z)
+                        .append("}}]").toString().describeConstable();
+                Server.broadcastPacket(player.getLevel().getPlayers().values(), pk);
                 return 1;
             }
             default -> {

@@ -161,6 +161,7 @@ public final class Trail {
     public void tick() {
         if (operator != null && showTrail && !playing) {
             getOrCalculateRuntimeMarkers().forEach(marker -> operator.getLevel().addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS));
+            markers.forEach(marker -> marker.spawnDirectionParticle(operator.getLevel()));
         }
     }
 

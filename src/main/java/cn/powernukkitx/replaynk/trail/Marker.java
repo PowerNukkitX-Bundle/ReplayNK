@@ -12,8 +12,10 @@ import cn.nukkit.form.element.ElementToggle;
 import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
+import cn.nukkit.math.BVector3;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.CameraInstructionPacket;
+import cn.nukkit.network.protocol.SpawnParticleEffectPacket;
 import cn.nukkit.potion.Effect;
 import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.entity.MarkerEntity;
@@ -175,6 +177,25 @@ public final class Marker {
 
     public boolean isDisplayEntitySpawned() {
         return markerEntity != null;
+    }
+
+    public void spawnDirectionParticle(Level level) {
+        var pk = new SpawnParticleEffectPacket();
+        pk.dimensionId = level.getDimensionData().getDimensionId();
+        pk.uniqueEntityId = -1;
+        pk.identifier = "replaynk:arrow";
+        var pos = new Vector3(x, y, z);
+        pk.position = pos.asVector3f();
+        var facing = BVector3.fromAngle(rotY, rotX).add(pos).getDirectionVector();
+        pk.molangVariablesJson = new StringBuilder()
+                .append("[{\"name\":\"variable.x\",\"value\":{\"type\":\"float\",\"value\":")
+                .append(facing.x)
+                .append("}},{\"name\":\"variable.y\",\"value\":{\"type\":\"float\",\"value\":")
+                .append(facing.y)
+                .append("}},{\"name\":\"variable.z\",\"value\":{\"type\":\"float\",\"value\":")
+                .append(facing.z)
+                .append("}}]").toString().describeConstable();
+        level.addChunkPacket((int) x >> 4, (int) z >> 4, pk);
     }
 
     public void showEditorForm(Player player, Trail trail) {
