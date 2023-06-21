@@ -10,7 +10,6 @@ import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.ParticleEffect;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.network.protocol.types.PlayerAbility;
 import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.item.*;
 import com.google.gson.Gson;

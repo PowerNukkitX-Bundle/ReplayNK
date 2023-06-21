@@ -1,15 +1,11 @@
 package cn.powernukkitx.replaynk.command;
 
-import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.command.tree.ParamList;
 import cn.nukkit.command.utils.CommandLogger;
-import cn.nukkit.math.BVector3;
-import cn.nukkit.math.VectorMath;
-import cn.nukkit.network.protocol.SpawnParticleEffectPacket;
 import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.trail.Trail;
 

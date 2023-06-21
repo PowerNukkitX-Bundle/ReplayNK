@@ -1,8 +1,5 @@
 package cn.powernukkitx.replaynk.trail;
 
-import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

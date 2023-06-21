@@ -1,6 +1,5 @@
 package cn.powernukkitx.replaynk.trail;
 
-import cn.nukkit.AdventureSettings;
 import cn.nukkit.Player;
 import cn.nukkit.camera.data.*;
 import cn.nukkit.camera.instruction.impl.ClearInstruction;
@@ -12,13 +11,11 @@ import cn.nukkit.form.element.ElementLabel;
 import cn.nukkit.form.element.ElementToggle;
 import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.math.BVector3;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.CameraInstructionPacket;
 import cn.nukkit.network.protocol.SpawnParticleEffectPacket;
-import cn.nukkit.network.protocol.types.PlayerAbility;
 import cn.nukkit.potion.Effect;
 import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.entity.MarkerEntity;
