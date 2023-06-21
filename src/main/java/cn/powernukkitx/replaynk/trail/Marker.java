@@ -21,6 +21,7 @@ import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.entity.MarkerEntity;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
 import java.util.Arrays;
 import java.util.List;
@@ -264,7 +265,7 @@ public final class Marker {
                         var lastMarker = markers.get(index - 1);
                         computeDistance(lastMarker);
                     } else {
-                        easeTime = 0;
+                        easeTime = -1;
                     }
                 }
 
@@ -276,44 +277,47 @@ public final class Marker {
         player.showFormWindow(form);
     }
 
+    @SneakyThrows
     public void play(Player player, Trail trail) {
         //TODO: 会导致运镜卡顿，需要一个更好的方案解决区块加载问题
 //        if (!player.hasEffect(Effect.INVISIBILITY))
 //            player.addEffect(Effect.getEffect(Effect.INVISIBILITY).setDuration(999999).setVisible(false));
 //        player.teleport(new Location(x, y, z, rotY, rotX));
-        var runtimeMarkers = trail.getRuntimeMarkers();
-        var markers = trail.getMarkers();
-        var preset = CameraPreset.FREE;
         var pk = new CameraInstructionPacket();
-        pk.setInstruction(SetInstruction.builder()
-                .preset(preset)
-                .pos(new Pos((float) x, (float) y, (float) z))
-                .rot(new Rot((float) rotX, (float) rotY))
-                .ease(new Ease((float) easeTime, easeType))
-                .build());
-        player.dataPacket(pk);
-        if (runtimeMarkers.indexOf(this) != 0) {
-            try {
-                //提前25ms以避免卡顿
-                var sleepTime = (long) (easeTime * 1000) - 25;
-                if (sleepTime > 0) {
-                    Thread.sleep(sleepTime);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        var preset = CameraPreset.FREE;
+        if (cachedIndex == 0) {
+            pk.setInstruction(SetInstruction.builder()
+                    .preset(preset)
+                    .pos(new Pos((float) x, (float) y, (float) z))
+                    .rot(new Rot((float) rotX, (float) rotY))
+                    .build());
+            player.dataPacket(pk);
+            //等待1s开始
+            Thread.sleep(1000);
+        } else {
+            pk.setInstruction(SetInstruction.builder()
+                    .preset(preset)
+                    .pos(new Pos((float) x, (float) y, (float) z))
+                    .rot(new Rot((float) rotX, (float) rotY))
+                    .ease(new Ease((float) easeTime, easeType))
+                    .build());
+            player.dataPacket(pk);
+            //提前25ms以避免卡顿
+            var sleepTime = (long) (easeTime * 1000) - 25;
+            if (sleepTime > 0) {
+                Thread.sleep(sleepTime);
             }
         }
-        if (!trail.isPlaying() || cachedIndex == runtimeMarkers.size() - 1) {
+        if (!trail.isPlaying() || cachedIndex == trail.getRuntimeMarkers().size() - 1) {
             trail.setPlaying(false);
             resetCamera(player);
-            markers.forEach(Marker::visible);
+            trail.getMarkers().forEach(Marker::visible);
             trail.clearRuntimeMarkers();
             //TODO 同上
 //            player.removeEffect(Effect.INVISIBILITY);
             return;
         }
-        var next = runtimeMarkers.get(cachedIndex + 1);
-        next.play(player, trail);
+        trail.getRuntimeMarkers().get(cachedIndex + 1).play(player, trail);
     }
 
     public void invisible() {
@@ -326,6 +330,10 @@ public final class Marker {
         if (markerEntity != null) {
             markerEntity.removeEffect(Effect.INVISIBILITY);
         }
+    }
+
+    public Vector3 getVector3() {
+        return new Vector3(x, y, z);
     }
 
     private void resetCamera(Player player) {

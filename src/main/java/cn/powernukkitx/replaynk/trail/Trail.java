@@ -170,7 +170,7 @@ public final class Trail {
     public void tick() {
         if (operator != null && !playing) {
             if (showTrail)
-                getOrCalculateRuntimeMarkers().forEach(marker -> operator.getLevel().addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS));
+                interpolator.showTrailParticle(getOrCalculateRuntimeMarkers(), operator.getLevel());
             if (showMarkerDirection)
                 markers.forEach(marker -> marker.spawnDirectionParticle(operator.getLevel()));
         }
@@ -365,6 +365,7 @@ public final class Trail {
         if (!playing)
             return false;
         playing = false;
+        //TODO: 主动使玩家脱离控制
         return true;
     }
 

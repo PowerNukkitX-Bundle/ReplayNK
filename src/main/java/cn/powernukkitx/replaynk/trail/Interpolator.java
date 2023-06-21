@@ -1,5 +1,9 @@
 package cn.powernukkitx.replaynk.trail;
 
+import cn.nukkit.level.Level;
+import cn.nukkit.level.ParticleEffect;
+import cn.nukkit.math.Vector3;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +22,19 @@ public enum Interpolator {
                 cloned.add(new Marker(marker));
             }
             return cloned;
+        }
+
+        @Override
+        public void showTrailParticle(List<Marker> markers, Level level) {
+            for (int i = 0; i < markers.size() - 1; i++) {
+                var startVec = markers.get(i).getVector3();
+                var endVec = markers.get(i + 1).getVector3();
+                var distance = (int) startVec.distance(endVec);
+                for (double j = 0; j < distance; j += 0.5) {
+                    var vec = startVec.add(endVec.subtract(startVec).multiply(j / distance));
+                    level.addParticleEffect(vec, ParticleEffect.BALLOON_GAS);
+                }
+            }
         }
     },
     BEZIER_CURVES {
@@ -60,6 +77,10 @@ public enum Interpolator {
 
     public List<Marker> interpolator(List<Marker> markers, double minDistance) {
         throw new UnsupportedOperationException();
+    }
+
+    public void showTrailParticle(List<Marker> markers, Level level) {
+        markers.forEach(marker -> level.addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS));
     }
 
     private static final double DEFAULT_BEZIER_CURVE_STEP = 0.001;
