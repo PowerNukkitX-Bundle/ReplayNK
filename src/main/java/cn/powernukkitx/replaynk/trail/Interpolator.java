@@ -66,7 +66,7 @@ public enum Interpolator {
                 if (i < markers.size() - 1) {
                     var left = markers.get(i - 1);
                     var right = markers.get(i);
-                    end = new Marker((left.getX() + right.getX()) / 2d, (left.getY() + right.getY()) / 2d, (left.getZ() + right.getZ()) / 2d, (left.getRotX() + right.getRotX()) / 2d, (left.getRotY() + right.getRotY()) / 2d, right.getEaseType(), (left.getCameraSpeed() + right.getCameraSpeed()) / 2d, right.getDistance() / 2d);
+                    end = new Marker((left.getX() + right.getX()) / 2d, (left.getY() + right.getY()) / 2d, (left.getZ() + right.getZ()) / 2d, (left.getRotX() + right.getRotX()) / 2d, (left.getRotY() + right.getRotY()) / 2d, right.getEaseType(), (left.getCameraSpeed() + right.getCameraSpeed()) / 2d);
                 } else {
                     end = markers.get(markers.size() - 1);
                 }

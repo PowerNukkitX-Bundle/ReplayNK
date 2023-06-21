@@ -7,6 +7,7 @@ import cn.nukkit.entity.provider.CustomClassEntityProvider;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
 import cn.nukkit.item.Item;
@@ -15,6 +16,7 @@ import cn.nukkit.lang.PluginI18nManager;
 import cn.nukkit.plugin.PluginBase;
 import cn.powernukkitx.replaynk.command.ReplayCommand;
 import cn.powernukkitx.replaynk.entity.MarkerEntity;
+import cn.powernukkitx.replaynk.entity.ReplayNKEntity;
 import cn.powernukkitx.replaynk.item.*;
 import cn.powernukkitx.replaynk.trail.Trail;
 import lombok.Getter;
@@ -31,6 +33,7 @@ import java.util.Map;
 public final class ReplayNK extends PluginBase implements Listener {
 
     public static final int TRAIL_TICK_PERIOD = 10;
+    public static final int TITLE_TASK_TICK_PERIOD = 5;
     private static final Map<Player, Integer> PLAYER_ACTION_TIMER = new HashMap<>();
     private static final int PLAYER_ACTION_COOL_DOWN = 1;
     @Getter
@@ -66,6 +69,18 @@ public final class ReplayNK extends PluginBase implements Listener {
                 trail.tick();
             }
         }, TRAIL_TICK_PERIOD);
+        Server.getInstance().getScheduler().scheduleRepeatingTask(this, () -> {
+            for (var player : Trail.getOperatingPlayers()) {
+                if (player.getInventory().getItemInHand() instanceof MarkerPickerItem markerPickerItem) {
+                    var index = markerPickerItem.getHoldingMarkerIndex();
+                    if (index == -1) {
+                        player.sendActionBar(getI18n().tr(player.getLanguageCode(), "replaynk.markerpicker.unpick"));
+                    } else {
+                        player.sendActionBar(getI18n().tr(player.getLanguageCode(), "replaynk.markerpicker.picked", index));
+                    }
+                }
+            }
+        }, TITLE_TASK_TICK_PERIOD);
     }
 
     @Override
@@ -81,7 +96,8 @@ public final class ReplayNK extends PluginBase implements Listener {
                 PauseItem.class,
                 PlayItem.class,
                 EditMarkerItem.class,
-                SettingItem.class
+                SettingItem.class,
+                MarkerPickerItem.class
         ));
     }
 
@@ -125,6 +141,14 @@ public final class ReplayNK extends PluginBase implements Listener {
         var player = event.getPlayer();
         if (Trail.isOperatingTrail(player)) {
             Trail.getOperatingTrail(player).stopOperating();
+        }
+    }
+
+    @EventHandler
+    @SuppressWarnings("unused")
+    private void onEntityDamaged(EntityDamageEvent event) {
+        if (event.getEntity() instanceof ReplayNKEntity) {
+            event.setCancelled();
         }
     }
 }

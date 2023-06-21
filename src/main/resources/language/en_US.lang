@@ -50,3 +50,9 @@ replaynk.mark.invalidindex=§cIllegal index!
 replaynk.mark.invalideasetime=§cIllegal camera time/speed!
 
 replaynk.generic.invalidinput=§cInvalid input! Please check your input and try again!
+
+replaynk.markerpicker.unpick=§eClick on a marker to select it
+replaynk.markerpicker.pick.success=§aSuccessfully selected marker §f{%0}§a!
+replaynk.markerpicker.picked=§aRight click to drop marker §f{%0}§a!
+replaynk.markerpicker.nopickedmarker=§cYou have not selected any markers!
+replaynk.markerpicker.move.success=§aSuccessfully moved marker §f{%0}§a!

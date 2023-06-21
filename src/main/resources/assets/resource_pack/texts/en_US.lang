@@ -6,3 +6,4 @@ item.replaynk:exit=Exit
 item.replaynk:clear_marker=Clear Marker
 item.replaynk:edit_marker=Edit Marker
 item.replaynk:setting=Setting
+item.replaynk:marker_picker=Marker Picker

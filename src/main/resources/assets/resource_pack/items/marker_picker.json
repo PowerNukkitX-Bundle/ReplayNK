@@ -1,0 +1,16 @@
+{
+	"format_version": "1.10.0",
+	"minecraft:item": {
+		"description": {
+			"identifier": "replaynk:marker_picker",
+			"category": "nature",
+			"is_experimental": false
+		},
+		"components": {
+			"minecraft:icon": "replaynk_marker_picker",
+			"minecraft:hover_text_color": "white",
+			"minecraft:render_offsets": "apple",
+			"minecraft:use_animation": "eat"
+		}
+	}
+}

@@ -22,6 +22,9 @@
 		},
 		"replaynk_setting": {
 			"textures": "textures/items/setting_item_texture"
+		},
+		"replaynk_marker_picker": {
+			"textures": "textures/items/marker_picker_item_texture"
 		}
 	}
 }

@@ -2,6 +2,8 @@ package cn.powernukkitx.replaynk.entity;
 
 import cn.nukkit.entity.custom.CustomEntityDefinition;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.math.AxisAlignedBB;
+import cn.nukkit.math.SimpleAxisAlignedBB;
 import cn.nukkit.nbt.tag.CompoundTag;
 
 /**

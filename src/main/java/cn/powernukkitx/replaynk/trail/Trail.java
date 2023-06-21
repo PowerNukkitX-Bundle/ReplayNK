@@ -138,6 +138,10 @@ public final class Trail {
         return OPERATING_TRAILS.get(player);
     }
 
+    public static Set<Player> getOperatingPlayers() {
+        return OPERATING_TRAILS.keySet();
+    }
+
     public static boolean isOperatingTrail(Player player) {
         return OPERATING_TRAILS.containsKey(player);
     }
@@ -199,6 +203,7 @@ public final class Trail {
         var addMarkerItem = new AddMarkerItem();
         var clearMarkerItem = new ClearMarkerItem();
         var editMarkerItem = new EditMarkerItem();
+        var markerPickerItem = new MarkerPickerItem();
         var playItem = new PlayItem();
         var pauseItem = new PauseItem();
         var settingItem = new SettingItem();
@@ -207,6 +212,7 @@ public final class Trail {
         addMarkerItem.setItemLockMode(Item.ItemLockMode.LOCK_IN_SLOT);
         clearMarkerItem.setItemLockMode(Item.ItemLockMode.LOCK_IN_SLOT);
         editMarkerItem.setItemLockMode(Item.ItemLockMode.LOCK_IN_SLOT);
+        markerPickerItem.setItemLockMode(Item.ItemLockMode.LOCK_IN_SLOT);
         playItem.setItemLockMode(Item.ItemLockMode.LOCK_IN_SLOT);
         pauseItem.setItemLockMode(Item.ItemLockMode.LOCK_IN_SLOT);
         settingItem.setItemLockMode(Item.ItemLockMode.LOCK_IN_SLOT);
@@ -215,9 +221,10 @@ public final class Trail {
         inventory.setItem(0, addMarkerItem);
         inventory.setItem(1, clearMarkerItem);
         inventory.setItem(2, editMarkerItem);
-        inventory.setItem(3, playItem);
-        inventory.setItem(4, pauseItem);
-        inventory.setItem(5, settingItem);
+        inventory.setItem(3, markerPickerItem);
+        inventory.setItem(4, playItem);
+        inventory.setItem(5, pauseItem);
+        inventory.setItem(6, settingItem);
         inventory.setItem(8, exitItem);
     }
 
@@ -232,17 +239,21 @@ public final class Trail {
         operator = null;
     }
 
-    public void addMarker(MarkerBuilder builder) {
-        var marker = builder.build(this);
-        addMarker(marker);
-    }
-
     public void addMarker(Marker marker) {
         markers.add(marker);
         if (operator != null) {
             marker.spawnDisplayEntity(operator.getLevel(), this);
         }
-        setChanged(true);
+        recalculateLinearDistanceAt(markers.size() - 1);
+    }
+
+    public void replaceMarker(int index, Marker marker) {
+        var replacedMarker = markers.set(index, marker);
+        replacedMarker.deleteDisplayEntity();
+        if (operator != null) {
+            marker.spawnDisplayEntity(operator.getLevel(), this);
+        }
+        recalculateLinearDistanceAt(index);
     }
 
     public void insertMarker(int index, Marker marker) {
@@ -253,7 +264,7 @@ public final class Trail {
         for (int i = index + 1; i < markers.size(); i++) {
             markers.get(i).updateDisplayEntity(this);
         }
-        setChanged(true);
+        recalculateLinearDistanceAt(index);
     }
 
     public void removeMarker(int index) {
@@ -262,7 +273,7 @@ public final class Trail {
         for (int i = index; i < markers.size(); i++) {
             markers.get(i).updateDisplayEntity(this);
         }
-        setChanged(true);
+        recalculateLinearDistanceAt(index);
     }
 
     public void moveMarker(int oldIndex, int newIndex) {
@@ -270,6 +281,29 @@ public final class Trail {
         markers.add(newIndex, marker);
         for (int i = Math.min(oldIndex, newIndex); i < markers.size(); i++) {
             markers.get(i).updateDisplayEntity(this);
+        }
+        recalculateLinearDistanceAt(oldIndex);
+        recalculateLinearDistanceAt(newIndex);
+    }
+
+    public void recalculateAllLinearDistance() {
+        computeAllLinearDistance(markers, false, minDistance);
+        setChanged(true);
+    }
+
+    public void recalculateLinearDistanceAt(int index) {
+        if (index < 0 || index >= markers.size())
+            throw new IndexOutOfBoundsException("Index out of bounds: " + index);
+        var marker = markers.get(index);
+        if (index == 0) {
+            marker.setDistance(1);
+            return;
+        }
+        var prevMarker = markers.get(index - 1);
+        marker.computeDistance(prevMarker);
+        if (index < markers.size() - 1) {
+            var nextMarker = markers.get(index + 1);
+            nextMarker.computeDistance(marker);
         }
         setChanged(true);
     }
@@ -341,6 +375,12 @@ public final class Trail {
 
     public void prepareRuntimeMarkers() {
         clearRuntimeMarkers();
+        if (markers.size() == 0) {
+            return;
+        } else if (markers.size() == 1) {
+            runtimeMarkers.add(markers.get(0));
+            return;
+        }
         //将第一个点的cameraSpeed设置为第二个点的cameraSpeed，以保证第一个点的cameraSpeed不会影响到插值
         markers.get(0).setCameraSpeed(markers.get(1).getCameraSpeed());
         runtimeMarkers = interpolator.interpolator(markers, minDistance);

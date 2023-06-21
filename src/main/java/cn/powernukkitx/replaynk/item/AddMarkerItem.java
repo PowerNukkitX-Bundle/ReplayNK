@@ -22,13 +22,8 @@ public class AddMarkerItem extends ReplayNKItem {
             return;
         }
         var trail = Trail.getOperatingTrail(player);
-        var location = player.getLocation();
-        var builder = Marker.builder()
-                .x((float) location.x)
-                .y((float) location.y)
-                .z((float) location.z)
-                .rotX((float) location.pitch)
-                .rotY((float) location.yaw);
+        var loc = player.getLocation();
+        var builder = new Marker(loc.x, loc.y, loc.z, loc.pitch, loc.yaw, trail.getDefaultCameraSpeed());
         trail.addMarker(builder);
         player.sendMessage(ReplayNK.getI18n().tr(player.getLanguageCode(), "replaynk.mark.added"));
     }

@@ -6,3 +6,4 @@ item.replaynk:exit.name=退出
 item.replaynk:clear_marker.name=删除路径点
 item.replaynk:edit_marker.name=修改路径点
 item.replaynk:setting.name=设置
+item.replaynk:marker_picker=路径点选择器

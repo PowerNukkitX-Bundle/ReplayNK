@@ -50,3 +50,9 @@ replaynk.mark.invalidindex=§c非法的序号!
 replaynk.mark.invalideasetime=§c非法的运镜时间/速度!
 
 replaynk.generic.invalidinput=§c非法的输入!请检查你提供的值并重试!
+
+replaynk.markerpicker.unpick=§e点击一个标记点以选中它
+replaynk.markerpicker.pick.success=§a成功选中了标记点 §f{%0} §a!
+replaynk.markerpicker.picked=§a点击右键以放下标记点 §f{%0} §a!
+replaynk.markerpicker.nopickedmarker=§c你没有选中任何标记点!
+replaynk.markerpicker.move.success=§a成功移动了标记点 §f{%0} §a!

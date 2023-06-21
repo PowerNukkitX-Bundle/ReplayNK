@@ -51,12 +51,12 @@ public final class Marker {
     @Setter
     private EaseType easeType;
     @Getter
-    private double cameraSpeed;
+    private double cameraSpeed = 1;
     @Getter
-    private double distance;
+    private double distance = 1;
 
     @Getter
-    private transient double easeTime = -1;
+    private transient double easeTime = 1;
     private transient MarkerEntity markerEntity;
     //用于给RuntimeMark缓存index，防止运镜卡顿
     private transient int cachedIndex;
@@ -64,19 +64,11 @@ public final class Marker {
     @Setter
     private transient boolean runtimeMark = false;
 
-    public Marker(double x, double y, double z, double rotX, double rotY, EaseType easeType, double cameraSpeed, double distance) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.rotX = rotX;
-        this.rotY = rotY;
-        this.easeType = easeType;
-        this.cameraSpeed = cameraSpeed;
-        this.distance = distance;
-        computeEaseTime();
+    public Marker(double x, double y, double z, double rotX, double rotY, double cameraSpeed) {
+        this(x, y, z, rotX, rotY, EaseType.LINEAR, cameraSpeed);
     }
 
-    public Marker(double x, double y, double z, double rotX, double rotY, EaseType easeType, double cameraSpeed, Marker lastMarker) {
+    public Marker(double x, double y, double z, double rotX, double rotY, EaseType easeType, double cameraSpeed) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -84,7 +76,7 @@ public final class Marker {
         this.rotY = rotY;
         this.easeType = easeType;
         this.cameraSpeed = cameraSpeed;
-        computeDistance(lastMarker);
+        computeEaseTime();
     }
 
     public Marker(Marker marker) {
@@ -97,10 +89,6 @@ public final class Marker {
         this.cameraSpeed = marker.cameraSpeed;
         this.distance = marker.distance;
         computeEaseTime();
-    }
-
-    public static MarkerBuilder builder() {
-        return new MarkerBuilder();
     }
 
     public void cacheIndex(int cachedIndex) {
