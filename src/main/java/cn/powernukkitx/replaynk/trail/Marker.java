@@ -55,6 +55,7 @@ public final class Marker {
     @Getter
     private double distance;
 
+    @Getter
     private transient double easeTime = -1;
     private transient MarkerEntity markerEntity;
     //用于给RuntimeMark缓存index，防止运镜卡顿
@@ -143,16 +144,12 @@ public final class Marker {
         this.easeTime = distance / this.cameraSpeed;
     }
 
-    public double getEaseTime() {
-        return easeTime;
-    }
-
     public void spawnDisplayEntity(Level level, Trail trail) {
         if (markerEntity != null)
-            throw new IllegalStateException("§cMarker entity already exists.");
+            throw new IllegalStateException("Marker entity already exists.");
         markerEntity = (MarkerEntity) Entity.createEntity("replaynk:marker", new Position(x, y, z, level));
         if (markerEntity == null)
-            throw new IllegalStateException("§cFailed to create marker entity.");
+            throw new IllegalStateException("Failed to create marker entity.");
         markerEntity.setNameTagAlwaysVisible(true);
         updateDisplayEntity(trail);
         markerEntity.spawnToAll();
@@ -185,12 +182,11 @@ public final class Marker {
         return markerEntity != null;
     }
 
-    public void spawnDirectionParticle(Level level) {
+    public static void spawnDirectionParticle(Vector3 pos, double rotX, double rotY, Level level) {
         var pk = new SpawnParticleEffectPacket();
         pk.dimensionId = level.getDimensionData().getDimensionId();
         pk.uniqueEntityId = -1;
         pk.identifier = "replaynk:arrow";
-        var pos = new Vector3(x, y, z);
         pk.position = pos.asVector3f();
         var facing = BVector3.fromAngle(rotY, rotX).add(pos).getDirectionVector();
         pk.molangVariablesJson = new StringBuilder()
@@ -201,7 +197,7 @@ public final class Marker {
                 .append("}},{\"name\":\"variable.z\",\"value\":{\"type\":\"float\",\"value\":")
                 .append(facing.z)
                 .append("}}]").toString().describeConstable();
-        level.addChunkPacket((int) x >> 4, (int) z >> 4, pk);
+        level.addChunkPacket((int) pos.x >> 4, (int) pos.z >> 4, pk);
     }
 
     public void showEditorForm(Player player, Trail trail) {

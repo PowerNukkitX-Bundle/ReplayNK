@@ -25,14 +25,21 @@ public enum Interpolator {
         }
 
         @Override
-        public void showTrailParticle(List<Marker> markers, Level level) {
+        public void showParticle(List<Marker> markers, Level level, boolean showDirection) {
             for (int i = 0; i < markers.size() - 1; i++) {
-                var startVec = markers.get(i).getVector3();
-                var endVec = markers.get(i + 1).getVector3();
+                var startMarker = markers.get(i);
+                var startVec = startMarker.getVector3();
+                var endMarker = markers.get(i + 1);
+                var endVec = endMarker.getVector3();
                 var distance = (int) startVec.distance(endVec);
                 for (double j = 0; j < distance; j += 0.5) {
                     var vec = startVec.add(endVec.subtract(startVec).multiply(j / distance));
                     level.addParticleEffect(vec, ParticleEffect.BALLOON_GAS);
+                    if (showDirection) {
+                        var rotX = startMarker.getRotX() + (endMarker.getRotX() - startMarker.getRotX()) * j / distance;
+                        var rotY = startMarker.getRotY() + (endMarker.getRotY() - startMarker.getRotY()) * j / distance;
+                        Marker.spawnDirectionParticle(vec, rotX, rotY, level);
+                    }
                 }
             }
         }
@@ -75,12 +82,19 @@ public enum Interpolator {
 
     public static final List<String> INTERPOLATOR_NAMES = Arrays.stream(values()).map(interpolator -> interpolator.name().toLowerCase()).toList();
 
+    /**
+     * 调用此方法即已保证markers.size() >= 2
+     */
     public List<Marker> interpolator(List<Marker> markers, double minDistance) {
         throw new UnsupportedOperationException();
     }
 
-    public void showTrailParticle(List<Marker> markers, Level level) {
-        markers.forEach(marker -> level.addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS));
+    public void showParticle(List<Marker> markers, Level level, boolean showDirection) {
+        markers.forEach(marker -> {
+            level.addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS);
+            if (showDirection)
+                Marker.spawnDirectionParticle(marker.getVector3(), marker.getRotX(), marker.getRotY(), level);
+        });
     }
 
     private static final double DEFAULT_BEZIER_CURVE_STEP = 0.001;

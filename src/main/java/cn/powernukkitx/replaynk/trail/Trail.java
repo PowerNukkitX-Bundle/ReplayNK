@@ -8,8 +8,6 @@ import cn.nukkit.form.element.ElementLabel;
 import cn.nukkit.form.element.ElementToggle;
 import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.item.Item;
-import cn.nukkit.level.ParticleEffect;
-import cn.nukkit.math.Vector3;
 import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.item.*;
 import com.google.gson.Gson;
@@ -170,9 +168,9 @@ public final class Trail {
     public void tick() {
         if (operator != null && !playing) {
             if (showTrail)
-                interpolator.showTrailParticle(getOrCalculateRuntimeMarkers(), operator.getLevel());
+                interpolator.showParticle(getOrCalculateRuntimeMarkers(), operator.getLevel(), showMarkerDirection);
             if (showMarkerDirection)
-                markers.forEach(marker -> marker.spawnDirectionParticle(operator.getLevel()));
+                markers.forEach(marker -> Marker.spawnDirectionParticle(marker.getVector3(), marker.getRotX(), marker.getRotY(), operator.getLevel()));
         }
     }
 
@@ -304,7 +302,7 @@ public final class Trail {
         var interpolatorDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.interpolator.details"));
         var showTrailElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showtrail"), showTrail);
         var showTrailDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showtrail.details"));
-        var showMarkerDirectionElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showmarkerdirection"), showTrail);
+        var showMarkerDirectionElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showmarkerdirection"), showMarkerDirection);
         var showMarkerDirectionDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showmarkerdirection.details"));
         var minDistanceElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.mindistance"), String.valueOf(DEFAULT_MIN_DISTANCE), String.valueOf(minDistance));
         var minDistanceDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.mindistance.details"));
@@ -343,6 +341,8 @@ public final class Trail {
 
     public void prepareRuntimeMarkers() {
         clearRuntimeMarkers();
+        //将第一个点的cameraSpeed设置为第二个点的cameraSpeed，以保证第一个点的cameraSpeed不会影响到插值
+        markers.get(0).setCameraSpeed(markers.get(1).getCameraSpeed());
         runtimeMarkers = interpolator.interpolator(markers, minDistance);
         runtimeMarkers.forEach(marker -> {
             marker.setCameraSpeed(marker.getCameraSpeed() * cameraSpeedMultiple);
