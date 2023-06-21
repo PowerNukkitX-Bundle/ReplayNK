@@ -344,7 +344,10 @@ public final class Trail {
     public void prepareRuntimeMarkers() {
         clearRuntimeMarkers();
         runtimeMarkers = interpolator.interpolator(markers, minDistance);
-        runtimeMarkers.forEach(marker -> marker.setCameraSpeed(marker.getCameraSpeed() * cameraSpeedMultiple));
+        runtimeMarkers.forEach(marker -> {
+            marker.setCameraSpeed(marker.getCameraSpeed() * cameraSpeedMultiple);
+            marker.setRuntimeMark(true);
+        });
         cacheIndexForRuntimeMarkers();
     }
 

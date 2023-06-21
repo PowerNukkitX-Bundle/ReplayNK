@@ -59,6 +59,9 @@ public final class Marker {
     private transient MarkerEntity markerEntity;
     //用于给RuntimeMark缓存index，防止运镜卡顿
     private transient int cachedIndex;
+    @Getter
+    @Setter
+    private transient boolean runtimeMark = false;
 
     public Marker(double x, double y, double z, double rotX, double rotY, EaseType easeType, double cameraSpeed, double distance) {
         this.x = x;
@@ -100,6 +103,8 @@ public final class Marker {
     }
 
     public void cacheIndex(int cachedIndex) {
+        if (!runtimeMark)
+            throw new IllegalStateException("Only runtime mark can cache index!");
         this.cachedIndex = cachedIndex;
     }
 
