@@ -21,6 +21,6 @@ public class PlayItem extends ReplayNKItem {
             return;
         }
         var trail = Trail.getOperatingTrail(player);
-        trail.play(player);
+        trail.play(player, true);
     }
 }

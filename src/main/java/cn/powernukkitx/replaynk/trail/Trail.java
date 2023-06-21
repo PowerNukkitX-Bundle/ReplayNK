@@ -10,6 +10,7 @@ import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.ParticleEffect;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.network.protocol.types.PlayerAbility;
 import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.item.*;
 import com.google.gson.Gson;
@@ -19,6 +20,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
@@ -51,6 +53,8 @@ public final class Trail {
     @Setter
     private boolean showTrail = true;
     @Setter
+    private boolean showMarkerDirection = true;
+    @Setter
     private double minDistance = DEFAULT_MIN_DISTANCE;
     @Setter
     private double defaultCameraSpeed = DEFAULT_CAMERA_SPEED;
@@ -78,8 +82,14 @@ public final class Trail {
         TRAILS.put(trail.getName(), trail);
     }
 
+    @Nullable
     public static Trail removeTrail(String name) {
-        return TRAILS.remove(name);
+        var removed = TRAILS.get(name);
+        if (removed == null)
+            return null;
+        removed.stopOperating();
+        TRAILS.remove(name);
+        return removed;
     }
 
     @SneakyThrows
@@ -159,9 +169,11 @@ public final class Trail {
     }
 
     public void tick() {
-        if (operator != null && showTrail && !playing) {
-            getOrCalculateRuntimeMarkers().forEach(marker -> operator.getLevel().addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS));
-            markers.forEach(marker -> marker.spawnDirectionParticle(operator.getLevel()));
+        if (operator != null && !playing) {
+            if (showTrail)
+                getOrCalculateRuntimeMarkers().forEach(marker -> operator.getLevel().addParticleEffect(new Vector3(marker.getX(), marker.getY(), marker.getZ()), ParticleEffect.BALLOON_GAS));
+            if (showMarkerDirection)
+                markers.forEach(marker -> marker.spawnDirectionParticle(operator.getLevel()));
         }
     }
 
@@ -269,16 +281,18 @@ public final class Trail {
         return GSON.toJson(this);
     }
 
-    public void play(Player player) {
+    public void play(Player player, boolean showMessage) {
+        var langCode = player.getLanguageCode();
         if (playing) {
-            player.sendMessage(ReplayNK.getI18n().tr(operator.getLanguageCode(), "replaynk.trail.alreadyplaying", name));
+            if (showMessage) player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.trail.alreadyplaying", name));
             return;
         }
         if (markers.size() <= 1) {
-            player.sendMessage(ReplayNK.getI18n().tr(operator.getLanguageCode(), "replaynk.trail.toolittlemarks", name));
+            if (showMessage) player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.trail.toolittlemarks", name));
             return;
         }
-        player.sendMessage(ReplayNK.getI18n().tr(operator.getLanguageCode(), "replaynk.trail.startplaying", name));
+        if (showMessage) player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.trail.startplaying", name));
+        //TODO: 去掉这个playing标识，现在只能同时给一个玩家播放:(
         playing = true;
         markers.forEach(Marker::invisible);
         prepareRuntimeMarkers();
@@ -291,6 +305,8 @@ public final class Trail {
         var interpolatorDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.interpolator.details"));
         var showTrailElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showtrail"), showTrail);
         var showTrailDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showtrail.details"));
+        var showMarkerDirectionElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showmarkerdirection"), showTrail);
+        var showMarkerDirectionDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showmarkerdirection.details"));
         var minDistanceElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.mindistance"), String.valueOf(DEFAULT_MIN_DISTANCE), String.valueOf(minDistance));
         var minDistanceDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.mindistance.details"));
         var defaultCameraSpeedElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.defaultcameraspeed"), String.valueOf(DEFAULT_CAMERA_SPEED), String.valueOf(defaultCameraSpeed));
@@ -299,21 +315,22 @@ public final class Trail {
         var doRecalculateEaseTimeDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.dorecalculateeasetime.details"));
         var cameraSpeedMultipleElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.cameraspeedmultiple"), String.valueOf(DEFAULT_CAMERA_SPEED_MULTIPLE), String.valueOf(cameraSpeedMultiple));
         var cameraSpeedMultipleDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.cameraspeedmultiple.details"));
-        var form = new FormWindowCustom(name, List.of(interpolatorElement, interpolatorDetailsElement, showTrailElement, showTrailDetailsElement, minDistanceElement, minDistanceDetailsElement, defaultCameraSpeedElement, defaultCameraSpeedDetailsElement, doRecalculateEaseTimeElement, doRecalculateEaseTimeDetailsElement, cameraSpeedMultipleElement, cameraSpeedMultipleDetailsElement));
+        var form = new FormWindowCustom(name, List.of(interpolatorElement, interpolatorDetailsElement, showTrailElement, showTrailDetailsElement, showMarkerDirectionElement, showMarkerDirectionDetailsElement, minDistanceElement, minDistanceDetailsElement, defaultCameraSpeedElement, defaultCameraSpeedDetailsElement, doRecalculateEaseTimeElement, doRecalculateEaseTimeDetailsElement, cameraSpeedMultipleElement, cameraSpeedMultipleDetailsElement));
         form.addHandler((p, id) -> {
             var response = form.getResponse();
             if (response == null) return;
             try {
                 interpolator = Interpolator.valueOf(response.getDropdownResponse(0).getElementContent().toUpperCase());
                 showTrail = response.getToggleResponse(2);
-                minDistance = Double.parseDouble(response.getInputResponse(4));
+                showMarkerDirection = response.getToggleResponse(4);
+                minDistance = Double.parseDouble(response.getInputResponse(6));
                 setChanged(true);
-                defaultCameraSpeed = Double.parseDouble(response.getInputResponse(6));
-                if (response.getToggleResponse(8)) {
+                defaultCameraSpeed = Double.parseDouble(response.getInputResponse(8));
+                if (response.getToggleResponse(10)) {
                     resetAllMarkerSpeed();
                     computeAllLinearDistance(markers, false, minDistance);
                 }
-                var multiple = Double.parseDouble(response.getInputResponse(10));
+                var multiple = Double.parseDouble(response.getInputResponse(12));
                 if (multiple <= 0) {
                     throw new IllegalArgumentException();
                 }

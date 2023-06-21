@@ -20,10 +20,12 @@ replaynk.trail.editorform.interpolator=§a插值器
 replaynk.trail.editorform.interpolator.details=§f指定用于平滑轨迹的插值器
 replaynk.trail.editorform.showtrail=§a显示轨迹
 replaynk.trail.editorform.showtrail.details=§f若开启，将会用粒子显示计算出的轨迹。注意，当插值器选择为线性时，轨迹不会显示
+replaynk.trail.editorform.showmarkerdirection=§a显示标记点方向
+replaynk.trail.editorform.showmarkerdirection.details=§f若开启，将会用一个箭头粒子显示标记点的方向
 replaynk.trail.editorform.mindistance=§a两点间最小距离
 replaynk.trail.editorform.mindistance.details=§f此参数指定了两个标记点间的最小距离，离上一个标记点距离小于此值的标记点将会被删除。§f若使用了非线性的插值器，计算出的标记点间距离将等于此值
 replaynk.trail.editorform.defaultcameraspeed=§a默认运镜速度
-replaynk.trail.editorform.defaultcameraspeed.details=§f此参数指定了创建标记点时的默认运镜速度。§f请注意，可以为每个标记点指定独立的运镜时间。运镜时间=两点距离/运镜速度，单位:秒
+replaynk.trail.editorform.defaultcameraspeed.details=§f此参数指定了创建标记点时的默认运镜速度。§f请注意，可以为每个标记点指定独立的运镜速度。
 replaynk.trail.editorform.dorecalculateeasetime=§a是否重新计算所有标记点的运镜时间
 replaynk.trail.editorform.dorecalculateeasetime.details=§f若启用，将会重置此轨迹预设中的所有标记点的运镜速度为默认运镜速度并使用默认运镜速度计算运镜时间
 replaynk.trail.editorform.cameraspeedmultiple=§a默认运镜速度倍数

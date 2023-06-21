@@ -1,5 +1,6 @@
 package cn.powernukkitx.replaynk.trail;
 
+import cn.nukkit.AdventureSettings;
 import cn.nukkit.Player;
 import cn.nukkit.camera.data.*;
 import cn.nukkit.camera.instruction.impl.ClearInstruction;
@@ -11,11 +12,13 @@ import cn.nukkit.form.element.ElementLabel;
 import cn.nukkit.form.element.ElementToggle;
 import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.math.BVector3;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.CameraInstructionPacket;
 import cn.nukkit.network.protocol.SpawnParticleEffectPacket;
+import cn.nukkit.network.protocol.types.PlayerAbility;
 import cn.nukkit.potion.Effect;
 import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.entity.MarkerEntity;
@@ -277,6 +280,10 @@ public final class Marker {
     }
 
     public void play(Player player, Trail trail) {
+        //TODO: 会导致运镜卡顿，需要一个更好的方案解决区块加载问题
+//        if (!player.hasEffect(Effect.INVISIBILITY))
+//            player.addEffect(Effect.getEffect(Effect.INVISIBILITY).setDuration(999999).setVisible(false));
+//        player.teleport(new Location(x, y, z, rotY, rotX));
         var runtimeMarkers = trail.getRuntimeMarkers();
         var markers = trail.getMarkers();
         var preset = CameraPreset.FREE;
@@ -304,6 +311,8 @@ public final class Marker {
             resetCamera(player);
             markers.forEach(Marker::visible);
             trail.clearRuntimeMarkers();
+            //TODO 同上
+//            player.removeEffect(Effect.INVISIBILITY);
             return;
         }
         var next = runtimeMarkers.get(cachedIndex + 1);

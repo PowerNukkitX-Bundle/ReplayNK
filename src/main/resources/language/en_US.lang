@@ -20,10 +20,12 @@ replaynk.trail.editorform.interpolator=§aInterpolator
 replaynk.trail.editorform.interpolator.details=§fSpecify an interpolator to use for smoothing the trail
 replaynk.trail.editorform.showtrail=§aShow trail
 replaynk.trail.editorform.showtrail.details=§fIf on, will display the calculated trail with particles. Note that when the interpolator is selected as linear, the trail will not be displayed
+replaynk.trail.editorform.showmarkerdirection=§aShow markers' direction
+replaynk.trail.editorform.showmarkerdirection.details=§fIf on, an arrow particle will be used to show the direction of each marker
 replaynk.trail.editorform.mindistance=§aMin distance between two marks
 replaynk.trail.editorform.mindistance.details=§fThis parameter specifies the minimum distance between two markers, and markers whose distance from the previous marker is less than this value will be deleted. §fIf the Bezier curve smoothing function is turned on, the calculated distance between marker points will be equal to this value
 replaynk.trail.editorform.defaultcameraspeed=§aDefault camera speed
-replaynk.trail.editorform.defaultcameraspeed.details=§fThis parameter specifies the default camera speed when creating markers.§fNote that independent camera speeds can be specified for each marker.Mirror movement time = distance between two points/mirror movement speed, unit: second
+replaynk.trail.editorform.defaultcameraspeed.details=§fThis parameter specifies the default camera speed when creating markers.§fNote that independent camera speeds can be specified for each marker.
 replaynk.trail.editorform.dorecalculateeasetime=§aDo recalculate all marks' ease time
 replaynk.trail.editorform.dorecalculateeasetime.details=§fIf enabled, will reset the camera speed of all markers in this track preset to the default camera speed and use the default camera speed to calculate the camera time
 replaynk.trail.editorform.cameraspeedmultiple=§aDefault camera speed multiplier
