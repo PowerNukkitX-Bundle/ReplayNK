@@ -30,6 +30,8 @@ replaynk.trail.editorform.dorecalculateeasetime=§aDo recalculate all marks' eas
 replaynk.trail.editorform.dorecalculateeasetime.details=§fIf enabled, will reset the camera speed of all markers in this track preset to the default camera speed and use the default camera speed to calculate the camera time
 replaynk.trail.editorform.cameraspeedmultiple=§aDefault camera speed multiplier
 replaynk.trail.editorform.cameraspeedmultiple.details=§fThis parameter specifies the camera speed multiple. For example, when you set it to 2, the actual camera speed of all markers will be doubled.
+replaynk.trail.editorform.showmarkerentitytoallplayers=§aShow marker entities for all players
+replaynk.trail.editorform.showmarkerentitytoallplayers.details=§fIf on, will show marker entities for all players. If off, only marker entities will be displayed for the operator.
 
 replaynk.mark.added=§aSuccessfully added marker!
 replaynk.mark.removed=§aSuccessfully removed marker!

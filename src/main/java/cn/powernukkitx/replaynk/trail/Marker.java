@@ -140,7 +140,11 @@ public final class Marker {
             throw new IllegalStateException("Failed to create marker entity.");
         markerEntity.setNameTagAlwaysVisible(true);
         updateDisplayEntity(trail);
-        markerEntity.spawnToAll();
+        if (trail.isShowMarkerEntityToAllPlayers()) {
+            markerEntity.spawnToAll();
+        } else {
+            markerEntity.spawnTo(trail.getOperator());
+        }
     }
 
     public void respawnDisplayEntity(Level level, Trail trail) {

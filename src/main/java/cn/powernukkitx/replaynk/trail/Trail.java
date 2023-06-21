@@ -52,6 +52,8 @@ public final class Trail {
     @Setter
     private boolean showMarkerDirection = true;
     @Setter
+    private boolean showMarkerEntityToAllPlayers = true;
+    @Setter
     private double minDistance = DEFAULT_MIN_DISTANCE;
     @Setter
     private double defaultCameraSpeed = DEFAULT_CAMERA_SPEED;
@@ -346,7 +348,9 @@ public final class Trail {
         var doRecalculateEaseTimeDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.dorecalculateeasetime.details"));
         var cameraSpeedMultipleElement = new ElementInput(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.cameraspeedmultiple"), String.valueOf(DEFAULT_CAMERA_SPEED_MULTIPLE), String.valueOf(cameraSpeedMultiple));
         var cameraSpeedMultipleDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.cameraspeedmultiple.details"));
-        var form = new FormWindowCustom(name, List.of(interpolatorElement, interpolatorDetailsElement, showTrailElement, showTrailDetailsElement, showMarkerDirectionElement, showMarkerDirectionDetailsElement, minDistanceElement, minDistanceDetailsElement, defaultCameraSpeedElement, defaultCameraSpeedDetailsElement, doRecalculateEaseTimeElement, doRecalculateEaseTimeDetailsElement, cameraSpeedMultipleElement, cameraSpeedMultipleDetailsElement));
+        var showMarkerEntityToAllPlayersElement = new ElementToggle(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showmarkerentitytoallplayers"), showMarkerEntityToAllPlayers);
+        var showMarkerEntityToAllPlayersDetailsElement = new ElementLabel(ReplayNK.getI18n().tr(langCode, "replaynk.trail.editorform.showmarkerentitytoallplayers.details"));
+        var form = new FormWindowCustom(name, List.of(interpolatorElement, interpolatorDetailsElement, showTrailElement, showTrailDetailsElement, showMarkerDirectionElement, showMarkerDirectionDetailsElement, minDistanceElement, minDistanceDetailsElement, defaultCameraSpeedElement, defaultCameraSpeedDetailsElement, doRecalculateEaseTimeElement, doRecalculateEaseTimeDetailsElement, cameraSpeedMultipleElement, cameraSpeedMultipleDetailsElement, showMarkerEntityToAllPlayersElement, showMarkerEntityToAllPlayersDetailsElement));
         form.addHandler((p, id) -> {
             var response = form.getResponse();
             if (response == null) return;
@@ -366,6 +370,7 @@ public final class Trail {
                     throw new IllegalArgumentException();
                 }
                 this.cameraSpeedMultiple = multiple;
+                showMarkerEntityToAllPlayers = response.getToggleResponse(14);
             } catch (Exception e) {
                 player.sendMessage(ReplayNK.getI18n().tr(langCode, "replaynk.generic.invalidinput"));
             }

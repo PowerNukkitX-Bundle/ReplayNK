@@ -30,6 +30,8 @@ replaynk.trail.editorform.dorecalculateeasetime=§a是否重新计算所有标�
 replaynk.trail.editorform.dorecalculateeasetime.details=§f若启用，将会重置此轨迹预设中的所有标记点的运镜速度为默认运镜速度并使用默认运镜速度计算运镜时间
 replaynk.trail.editorform.cameraspeedmultiple=§a默认运镜速度倍数
 replaynk.trail.editorform.cameraspeedmultiple.details=§f此参数指定了轨迹播放的倍速。例如当你将其设置为2，所有标记点的实际运镜速度将会变为原来的2倍。
+replaynk.trail.editorform.showmarkerentitytoallplayers=§a为所有玩家显示标记点实体
+replaynk.trail.editorform.showmarkerentitytoallplayers.details=§f若开启，将会为所有玩家显示标记点实体。若关闭，将只为操作者显示标记点实体。
 
 replaynk.mark.added=§a成功添加标记点!
 replaynk.mark.removed=§a成功移除标记点!
