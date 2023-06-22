@@ -6,11 +6,11 @@
 
 `ReplayNK` is a camera plugin developed for the Bedrock Edition server software `PowerNukkitX`, based on the latest Camera API of MCBE 1.20.0
 
-`Replay NK` has made a lot of optimizations for camera movement, making its camera movement smoother and smoother than the traditional `/teleport`command plus command block to achieve camera movement
+`ReplayNK` has made a lot of optimizations for camera movement, making its camera movement smoother and smoother than the traditional `/teleport`command plus command block to achieve camera movement
 
 `ReplayNK` perfectly supports all available parameters of the original `/camera` command, and adds a series of smoothing algorithms for path smoothing, such as Bézier curves.
 
-`Replay NK` is simple and intuitive to use, with full visual operation, and most of the functions can be activated with one click of a button. At the same time, the plugin supports Chinese and English dual languages, and will automatically switch according to the user's language settings.
+`ReplayNK` is simple and intuitive to use, with full visual operation, and most of the functions can be activated with one click of a button. At the same time, the plugin supports Chinese and English dual languages, and will automatically switch according to the user's language settings.
 
 ## Simple tutorial
 
