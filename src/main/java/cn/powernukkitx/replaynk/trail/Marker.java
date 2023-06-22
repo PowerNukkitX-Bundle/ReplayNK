@@ -328,6 +328,14 @@ public final class Marker {
         return new Vector3(x, y, z);
     }
 
+    public BVector3 getDirectionVec() {
+        return BVector3.fromAngle(rotY, rotX);
+    }
+
+    public Vector3 getOffsettedDirectionVec() {
+        return getDirectionVec().addToPos(getVector3());
+    }
+
     private void resetCamera(Player player) {
         var pk = new CameraInstructionPacket();
         pk.setInstruction(ClearInstruction.get());

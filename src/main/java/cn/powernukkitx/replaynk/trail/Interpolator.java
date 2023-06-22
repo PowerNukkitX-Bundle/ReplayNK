@@ -2,6 +2,7 @@ package cn.powernukkitx.replaynk.trail;
 
 import cn.nukkit.level.Level;
 import cn.nukkit.level.ParticleEffect;
+import cn.nukkit.math.BVector3;
 import cn.nukkit.math.Vector3;
 
 import java.util.ArrayList;
@@ -101,7 +102,13 @@ public enum Interpolator {
                     p[i].setY((1 - u) * p[i].getY() + u * p[i + 1].getY());
                     p[i].setZ((1 - u) * p[i].getZ() + u * p[i + 1].getZ());
                     p[i].setRotX((1 - u) * p[i].getRotX() + u * p[i + 1].getRotX());
-                    p[i].setRotY((1 - u) * p[i].getRotY() + u * p[i + 1].getRotY());
+                    var startDirection = p[i].getDirectionVec().addToPos();
+                    var endDirection = p[i + 1].getDirectionVec().addToPos();
+                    var resultDirection = BVector3.fromPos(
+                            (1 - u) * startDirection.getX() + u * endDirection.getX(),
+                            (1 - u) * startDirection.getY() + u * endDirection.getY(),
+                            (1 - u) * startDirection.getZ() + u * endDirection.getZ());
+                    p[i].setRotY(resultDirection.getYaw());
                     p[i].setCameraSpeed((1 - u) * p[i].getCameraSpeed() + u * p[i + 1].getCameraSpeed());
                 }
             }

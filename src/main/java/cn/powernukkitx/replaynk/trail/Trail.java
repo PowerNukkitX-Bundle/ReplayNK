@@ -21,6 +21,8 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author daoge_cmd
@@ -39,7 +41,7 @@ public final class Trail {
             .create();
     private static final Map<String, Trail> TRAILS = new HashMap<>();
     private static final Map<Player, Trail> OPERATING_TRAILS = new HashMap<>();
-    private final List<Marker> markers = new ArrayList<>();
+    private final List<Marker> markers = new CopyOnWriteArrayList<>();
     private final String name;
     private transient Player operator;
     @Setter
@@ -202,7 +204,7 @@ public final class Trail {
 
     public void clearRuntimeMarkers() {
         if (runtimeMarkers == null) {
-            runtimeMarkers = new ArrayList<>();
+            runtimeMarkers = new CopyOnWriteArrayList<>();
             return;
         }
         if (runtimeMarkers.isEmpty())
@@ -427,7 +429,7 @@ public final class Trail {
         }
         //将第一个点的cameraSpeed设置为第二个点的cameraSpeed，以保证第一个点的cameraSpeed不会影响到插值
         markers.get(0).setCameraSpeed(markers.get(1).getCameraSpeed());
-        runtimeMarkers = interpolator.interpolator(markers, minDistance);
+        runtimeMarkers = new CopyOnWriteArrayList<>(interpolator.interpolator(markers, minDistance));
         runtimeMarkers.forEach(marker -> {
             marker.setCameraSpeed(marker.getCameraSpeed() * cameraSpeedMultiple);
             marker.setRuntimeMark(true);

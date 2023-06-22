@@ -68,7 +68,7 @@ public final class ReplayNK extends PluginBase implements Listener {
             for (var trail : Trail.getTrails().values()) {
                 trail.tick();
             }
-        }, TRAIL_TICK_PERIOD);
+        }, TRAIL_TICK_PERIOD, true);
         Server.getInstance().getScheduler().scheduleRepeatingTask(this, () -> {
             for (var player : Trail.getOperatingPlayers()) {
                 if (player.getInventory().getItemInHand() instanceof MarkerPickerItem markerPickerItem) {
