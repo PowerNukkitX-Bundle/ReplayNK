@@ -2,12 +2,14 @@ package cn.powernukkitx.replaynk.trail;
 
 import cn.nukkit.Player;
 import cn.nukkit.api.DoNotModify;
+import cn.nukkit.camera.instruction.impl.ClearInstruction;
 import cn.nukkit.form.element.ElementDropdown;
 import cn.nukkit.form.element.ElementInput;
 import cn.nukkit.form.element.ElementLabel;
 import cn.nukkit.form.element.ElementToggle;
 import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.item.Item;
+import cn.nukkit.network.protocol.CameraInstructionPacket;
 import cn.powernukkitx.replaynk.ReplayNK;
 import cn.powernukkitx.replaynk.item.*;
 import com.google.gson.Gson;
@@ -21,8 +23,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author daoge_cmd
@@ -41,7 +41,7 @@ public final class Trail {
             .create();
     private static final Map<String, Trail> TRAILS = new HashMap<>();
     private static final Map<Player, Trail> OPERATING_TRAILS = new HashMap<>();
-    private final List<Marker> markers = new CopyOnWriteArrayList<>();
+    private final List<Marker> markers = new ArrayList<>();
     private final String name;
     private transient Player operator;
     @Setter
@@ -204,7 +204,7 @@ public final class Trail {
 
     public void clearRuntimeMarkers() {
         if (runtimeMarkers == null) {
-            runtimeMarkers = new CopyOnWriteArrayList<>();
+            runtimeMarkers = new ArrayList<>();
             return;
         }
         if (runtimeMarkers.isEmpty())
@@ -396,11 +396,18 @@ public final class Trail {
             var response = form.getResponse();
             if (response == null) return;
             try {
-                interpolator = Interpolator.valueOf(response.getDropdownResponse(0).getElementContent().toUpperCase());
+                var newInterpolator = Interpolator.valueOf(response.getDropdownResponse(0).getElementContent().toUpperCase());
+                if (interpolator != newInterpolator) {
+                    interpolator = newInterpolator;
+                    setChanged(true);
+                }
                 showTrail = response.getToggleResponse(2);
                 showMarkerDirection = response.getToggleResponse(4);
-                minDistance = Double.parseDouble(response.getInputResponse(6));
-                setChanged(true);
+                var newMinDistance = Double.parseDouble(response.getInputResponse(6));
+                if (Math.abs(minDistance - newMinDistance) > 0.0001) {
+                    minDistance = newMinDistance;
+                    setChanged(true);
+                }
                 defaultCameraSpeed = Double.parseDouble(response.getInputResponse(8));
                 if (response.getToggleResponse(10)) {
                     resetAllMarkerSpeed();
@@ -429,7 +436,7 @@ public final class Trail {
         }
         //将第一个点的cameraSpeed设置为第二个点的cameraSpeed，以保证第一个点的cameraSpeed不会影响到插值
         markers.get(0).setCameraSpeed(markers.get(1).getCameraSpeed());
-        runtimeMarkers = new CopyOnWriteArrayList<>(interpolator.interpolator(markers, minDistance));
+        runtimeMarkers = interpolator.interpolator(new ArrayList<>(markers), minDistance);
         runtimeMarkers.forEach(marker -> {
             marker.setCameraSpeed(marker.getCameraSpeed() * cameraSpeedMultiple);
             marker.setRuntimeMark(true);
@@ -454,7 +461,12 @@ public final class Trail {
         if (!playing)
             return false;
         playing = false;
-        //TODO: 主动使玩家脱离控制
+        //todo: 目前能播放trail的只能是operator，在未来会支持其他玩家播放trail，这边的代码就得修改
+        if (operator != null) {
+            var pk = new CameraInstructionPacket();
+            pk.setInstruction(ClearInstruction.get());
+            operator.dataPacket(pk);
+        }
         return true;
     }
 }

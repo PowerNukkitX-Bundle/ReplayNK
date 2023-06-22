@@ -88,7 +88,7 @@ public final class Marker {
         this.easeType = marker.easeType;
         this.cameraSpeed = marker.cameraSpeed;
         this.distance = marker.distance;
-        computeEaseTime();
+        this.easeTime = marker.easeTime;
     }
 
     public static void spawnDirectionParticle(Vector3 pos, double rotX, double rotY, Level level) {
