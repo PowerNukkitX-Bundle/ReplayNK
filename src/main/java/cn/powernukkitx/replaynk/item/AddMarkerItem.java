@@ -23,7 +23,7 @@ public class AddMarkerItem extends ReplayNKItem {
         }
         var trail = Trail.getOperatingTrail(player);
         var loc = player.getLocation();
-        var builder = new Marker(loc.x, loc.y, loc.z, loc.pitch, loc.yaw, trail.getDefaultCameraSpeed());
+        var builder = new Marker(loc.x, loc.y + player.getEyeHeight(), loc.z, loc.pitch, loc.yaw, trail.getDefaultCameraSpeed());
         trail.addMarker(builder);
         player.sendMessage(ReplayNK.getI18n().tr(player.getLanguageCode(), "replaynk.mark.added"));
     }

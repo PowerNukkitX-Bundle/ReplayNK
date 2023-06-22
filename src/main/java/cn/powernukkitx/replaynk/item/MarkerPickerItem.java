@@ -49,7 +49,7 @@ public class MarkerPickerItem extends ReplayNKItem {
         player.getInventory().setItemInHand(this);
         var marker = trail.getMarkers().get(index);
         marker.setX(player.getX());
-        marker.setY(player.getY());
+        marker.setY(player.getY() + player.getEyeHeight());
         marker.setZ(player.getZ());
         marker.setRotX(player.getPitch());
         marker.setRotY(player.getYaw());

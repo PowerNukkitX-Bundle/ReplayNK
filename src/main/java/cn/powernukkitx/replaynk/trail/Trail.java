@@ -295,7 +295,10 @@ public final class Trail {
         for (int i = index; i < markers.size(); i++) {
             markers.get(i).updateDisplayEntity(this);
         }
-        recalculateLinearDistanceAt(index);
+        if (index < markers.size())
+            recalculateLinearDistanceAt(index);
+        else
+            setChanged(true);
     }
 
     public void moveMarker(int oldIndex, int newIndex) {
