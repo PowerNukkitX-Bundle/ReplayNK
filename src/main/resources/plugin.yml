@@ -1,6 +1,6 @@
 name: ReplayNK
 main: cn.powernukkitx.replaynk.ReplayNK
-version: "1.0.0"
+version: "1.0.1"
 api: ["1.0.14"]
 load: POSTWORLD
 author: daoge_cmd
