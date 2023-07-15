@@ -28,6 +28,22 @@ public class MarkerEntity extends ReplayNKEntity {
         return DEF;
     }
 
+
+    @Override
+    public float getHeight() {
+        return 0.5F;
+    }
+
+    @Override
+    public float getWidth() {
+        return 0.5F;
+    }
+
+    @Override
+    public float getLength() {
+        return 0.5F;
+    }
+
     @Override
     public String getOriginalName() {
         return "Marker";
