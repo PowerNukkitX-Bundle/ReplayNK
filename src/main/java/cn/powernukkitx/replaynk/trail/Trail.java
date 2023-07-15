@@ -88,7 +88,9 @@ public final class Trail {
         var removed = TRAILS.get(name);
         if (removed == null)
             return null;
-        removed.stopOperating();
+        if (removed.getOperator() != null) {
+            removed.stopOperating();
+        }
         TRAILS.remove(name);
         return removed;
     }
